@@ -47,7 +47,7 @@ public class Client {
     @Column(name = "birth_date")
     private LocalDate birthDate;
     
-    @Column(name = "address", length = 500)
+    @Column(name = "address", columnDefinition = "TEXT")
     private String address;
     
     @Column(name = "occupation")
