@@ -1,3 +1,13 @@
+    <!-- Policy Details Modal -->
+    <div id="policyDetailsModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Detalles de la Póliza</h3>
+                <button class="modal-close" onclick="closePolicyDetailsModal()">&times;</button>
+            </div>
+            <div id="policyDetailsBody" class="modal-body"></div>
+        </div>
+    </div>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -62,6 +72,7 @@
                                 <tr>
                                     <th>Número</th>
                                     <th>Tipo</th>
+                                    <th>Cliente</th>
                                     <th>Prima</th>
                                     <th>Estado</th>
                                     <th>Vencimiento</th>
@@ -225,6 +236,7 @@
                 <tr>
                     <td>${policy.policyNumber}</td>
                     <td>${policy.policyType}</td>
+                    <td>${policy.clientName || '-'}</td>
                     <td>${formatCurrency(policy.premiumAmount)}</td>
                     <td>
                         <span class="badge badge-${getPolicyStatusColor(policy.status)}">
@@ -292,7 +304,7 @@
         }
 
         function fillPolicyForm(policy) {
-            document.getElementById('clientSelect').value = policy.client.id;
+            document.getElementById('clientSelect').value = policy.clientId || '';
             document.getElementById('policyType').value = policy.policyType;
             document.getElementById('premiumAmount').value = policy.premiumAmount;
             document.getElementById('coverageAmount').value = policy.coverageAmount;
@@ -361,9 +373,47 @@
             }
         }
 
-        function viewPolicyDetails(policyId) {
-            // Could implement a detailed view modal here
-            editPolicy(policyId);
+        async function viewPolicyDetails(policyId) {
+            try {
+                const response = await apiService.getPolicy(policyId);
+                if (response && response.success) {
+                    openPolicyDetailsModal(response.data);
+                } else {
+                    showAlert('Error al cargar detalles de la póliza');
+                }
+            } catch (error) {
+                showAlert('Error de conexión al cargar detalles de la póliza');
+            }
+        }
+
+        function openPolicyDetailsModal(policy) {
+            const body = document.getElementById('policyDetailsBody');
+            body.innerHTML = `
+                <div class="details-grid">
+                    <div><span class="label">Número:</span><span class="value">${policy.policyNumber}</span></div>
+                    <div><span class="label">Tipo:</span><span class="value">${policy.policyType}</span></div>
+                    <div><span class="label">Cliente:</span><span class="value">${policy.clientName || '-'}</span></div>
+                    <div><span class="label">Cobertura:</span><span class="value">${policy.coverage}</span></div>
+                    <div><span class="label">Prima:</span><span class="value">${formatCurrency(policy.premiumAmount)}</span></div>
+                    <div><span class="label">Monto Cobertura:</span><span class="value">${formatCurrency(policy.coverageAmount)}</span></div>
+                    <div><span class="label">Inicio:</span><span class="value">${formatDate(policy.startDate)}</span></div>
+                    <div><span class="label">Vencimiento:</span><span class="value">${formatDate(policy.endDate)}</span></div>
+                    <div><span class="label">Estado:</span>
+                        <span class="badge badge-${getPolicyStatusColor(policy.status)}">
+                            ${getPolicyStatusText(policy.status)}
+                        </span>
+                    </div>
+                    <div><span class="label">Deducible:</span><span class="value">${policy.deductible ?? '-'}</span></div>
+                    <div><span class="label">Beneficiarios:</span><span class="value">${policy.beneficiaries ?? '-'}</span></div>
+                    <div class="full-width"><span class="label">Términos y Condiciones:</span><span class="value">${policy.termsConditions ?? '-'}</span></div>
+                </div>
+            `;
+            document.getElementById('policyDetailsModal').classList.add('show');
+        }
+
+
+        function closePolicyDetailsModal() {
+            document.getElementById('policyDetailsModal').classList.remove('show');
         }
 
         // Close modal on outside click

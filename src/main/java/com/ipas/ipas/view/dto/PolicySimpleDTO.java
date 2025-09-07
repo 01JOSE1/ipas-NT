@@ -13,10 +13,15 @@ public class PolicySimpleDTO {
     private LocalDate startDate;
     private LocalDate endDate;
     private String status;
+    private Long clientId;
+    private BigDecimal deductible;
+    private String beneficiaries;
+    private String termsConditions;
+    private String clientName;
 
     public PolicySimpleDTO() {}
 
-    public PolicySimpleDTO(Long id, String policyNumber, String policyType, String coverage, BigDecimal premiumAmount, BigDecimal coverageAmount, LocalDate startDate, LocalDate endDate, String status) {
+    public PolicySimpleDTO(Long id, String policyNumber, String policyType, String coverage, BigDecimal premiumAmount, BigDecimal coverageAmount, LocalDate startDate, LocalDate endDate, String status, Long clientId, BigDecimal deductible, String beneficiaries, String termsConditions, String clientName) {
         this.id = id;
         this.policyNumber = policyNumber;
         this.policyType = policyType;
@@ -26,7 +31,22 @@ public class PolicySimpleDTO {
         this.startDate = startDate;
         this.endDate = endDate;
         this.status = status;
+        this.clientId = clientId;
+        this.deductible = deductible;
+        this.beneficiaries = beneficiaries;
+        this.termsConditions = termsConditions;
+        this.clientName = clientName;
     }
+    public BigDecimal getDeductible() { return deductible; }
+    public void setDeductible(BigDecimal deductible) { this.deductible = deductible; }
+    public String getBeneficiaries() { return beneficiaries; }
+    public void setBeneficiaries(String beneficiaries) { this.beneficiaries = beneficiaries; }
+    public String getTermsConditions() { return termsConditions; }
+    public void setTermsConditions(String termsConditions) { this.termsConditions = termsConditions; }
+    public String getClientName() { return clientName; }
+    public void setClientName(String clientName) { this.clientName = clientName; }
+    public Long getClientId() { return clientId; }
+    public void setClientId(Long clientId) { this.clientId = clientId; }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

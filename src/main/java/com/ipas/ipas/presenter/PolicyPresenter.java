@@ -63,7 +63,12 @@ public class PolicyPresenter {
                 policy.getCoverageAmount(),
                 policy.getStartDate(),
                 policy.getEndDate(),
-                policy.getStatus() != null ? policy.getStatus().name() : null
+                policy.getStatus() != null ? policy.getStatus().name() : null,
+                policy.getClient() != null ? policy.getClient().getId() : null,
+                policy.getDeductible(),
+                policy.getBeneficiaries(),
+                policy.getTermsConditions(),
+                policy.getClient() != null ? (policy.getClient().getFirstName() + " " + policy.getClient().getLastName()) : null
             )).collect(Collectors.toList());
             response.put("success", true);
             response.put("data", policyDTOs);
@@ -90,8 +95,24 @@ public class PolicyPresenter {
                     User user = currentUser.get();
                     if (user.getRole() == User.UserRole.ADMINISTRADOR || 
                         policy.getClient().getUser().getId().equals(user.getId())) {
+                        PolicySimpleDTO policyDTO = new PolicySimpleDTO(
+                            policy.getId(),
+                            policy.getPolicyNumber(),
+                            policy.getPolicyType(),
+                            policy.getCoverage(),
+                            policy.getPremiumAmount(),
+                            policy.getCoverageAmount(),
+                            policy.getStartDate(),
+                            policy.getEndDate(),
+                            policy.getStatus() != null ? policy.getStatus().name() : null,
+                            policy.getClient() != null ? policy.getClient().getId() : null,
+                            policy.getDeductible(),
+                            policy.getBeneficiaries(),
+                            policy.getTermsConditions(),
+                            policy.getClient() != null ? (policy.getClient().getFirstName() + " " + policy.getClient().getLastName()) : null
+                        );
                         response.put("success", true);
-                        response.put("data", policy);
+                        response.put("data", policyDTO);
                     } else {
                         response.put("success", false);
                         response.put("message", "Access denied");
@@ -149,10 +170,25 @@ public class PolicyPresenter {
             policy.setClient(client);
             
             Policy savedPolicy = policyService.save(policy);
+            PolicySimpleDTO policyDTO = new PolicySimpleDTO(
+                savedPolicy.getId(),
+                savedPolicy.getPolicyNumber(),
+                savedPolicy.getPolicyType(),
+                savedPolicy.getCoverage(),
+                savedPolicy.getPremiumAmount(),
+                savedPolicy.getCoverageAmount(),
+                savedPolicy.getStartDate(),
+                savedPolicy.getEndDate(),
+                savedPolicy.getStatus() != null ? savedPolicy.getStatus().name() : null,
+                savedPolicy.getClient() != null ? savedPolicy.getClient().getId() : null,
+                savedPolicy.getDeductible(),
+                savedPolicy.getBeneficiaries(),
+                savedPolicy.getTermsConditions(),
+                savedPolicy.getClient() != null ? (savedPolicy.getClient().getFirstName() + " " + savedPolicy.getClient().getLastName()) : null
+            );
             response.put("success", true);
-            response.put("data", savedPolicy);
+            response.put("data", policyDTO);
             response.put("message", "Policy created successfully");
-            
             return ResponseEntity.ok(response);
             
         } catch (Exception e) {
@@ -188,8 +224,24 @@ public class PolicyPresenter {
                         policy.setTermsConditions(policyRequest.getTermsConditions());
                         
                         Policy updatedPolicy = policyService.update(policy);
+                        PolicySimpleDTO policyDTO = new PolicySimpleDTO(
+                            updatedPolicy.getId(),
+                            updatedPolicy.getPolicyNumber(),
+                            updatedPolicy.getPolicyType(),
+                            updatedPolicy.getCoverage(),
+                            updatedPolicy.getPremiumAmount(),
+                            updatedPolicy.getCoverageAmount(),
+                            updatedPolicy.getStartDate(),
+                            updatedPolicy.getEndDate(),
+                            updatedPolicy.getStatus() != null ? updatedPolicy.getStatus().name() : null,
+                            updatedPolicy.getClient() != null ? updatedPolicy.getClient().getId() : null,
+                            updatedPolicy.getDeductible(),
+                            updatedPolicy.getBeneficiaries(),
+                            updatedPolicy.getTermsConditions(),
+                            updatedPolicy.getClient() != null ? (updatedPolicy.getClient().getFirstName() + " " + updatedPolicy.getClient().getLastName()) : null
+                        );
                         response.put("success", true);
-                        response.put("data", updatedPolicy);
+                        response.put("data", policyDTO);
                         response.put("message", "Policy updated successfully");
                     } else {
                         response.put("success", false);
