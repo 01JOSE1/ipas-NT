@@ -32,12 +32,10 @@ public class AuthPresenter {
             boolean isAuthenticated = userService.authenticate(
                     loginRequest.getEmail(),
                     loginRequest.getPassword());
-
             if (isAuthenticated) {
                 Optional<User> userOpt = userService.findByEmail(loginRequest.getEmail());
                 if (userOpt.isPresent()) {
                     User user = userOpt.get();
-
                     if (user.getTwoFactorEnabled() &&
                             (loginRequest.getTwoFactorCode() == null || loginRequest.getTwoFactorCode().isEmpty())) {
                         response.put("success", false);
@@ -45,14 +43,9 @@ public class AuthPresenter {
                         response.put("requiresTwoFactor", true);
                         return ResponseEntity.ok(response);
                     }
-
                     String token = jwtUtil.generateToken(user.getEmail());
-                    System.out.println("Token generado: " + token); // <-- Agrega este log
+                    System.out.println("Token generado: " + token);
                     userService.updateLastLogin(user.getId());
-
-                    LoginResponse loginResponse = new LoginResponse();
-                    loginResponse.setToken(token);
-                    // Usar DTO simple para evitar ciclos de serialización
                     UserSimpleDTO userDto = new UserSimpleDTO(
                         user.getId(),
                         user.getEmail(),
@@ -60,22 +53,23 @@ public class AuthPresenter {
                         user.getLastName(),
                         user.getRole()
                     );
-                    loginResponse.setUser(userDto);
-
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("token", token);
+                    data.put("user", userDto);
                     response.put("success", true);
-                    response.put("data", loginResponse);
+                    response.put("data", data);
                     response.put("message", "Login successful");
+                    System.out.println("Login response: " + response);
                     return ResponseEntity.ok(response);
                 }
             }
-
             response.put("success", false);
             response.put("message", "Invalid credentials");
             return ResponseEntity.badRequest().body(response);
-
         } catch (Exception e) {
             response.put("success", false);
             response.put("message", "Login error: " + e.getMessage());
+            System.err.println("Login error: " + e.getMessage());
             return ResponseEntity.internalServerError().body(response);
         }
     }

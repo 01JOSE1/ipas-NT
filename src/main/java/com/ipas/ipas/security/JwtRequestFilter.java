@@ -61,7 +61,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         // Validar token y establecer contexto de seguridad
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
-
             if (jwtUtil.validateToken(jwtToken, userDetails.getUsername())) {
                 System.out.println("✅ Token is valid, setting authentication context");
                 UsernamePasswordAuthenticationToken authenticationToken =
@@ -70,9 +69,16 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             } else {
                 System.out.println("❌ Token validation failed");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("Token inválido o expirado");
+                return;
             }
+        } else if (username == null && requestTokenHeader != null) {
+            System.out.println("❌ No se pudo extraer el usuario del token");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Token inválido");
+            return;
         }
-
         chain.doFilter(request, response);
     }
     

@@ -1,4 +1,5 @@
 package com.ipas.ipas.presenter;
+import com.ipas.ipas.view.dto.UserResponse;
 
 import com.ipas.ipas.model.entity.User;
 import com.ipas.ipas.model.service.UserService;
@@ -19,13 +20,14 @@ public class UserPresenter {
     
     public ResponseEntity<Map<String, Object>> handleGetAllUsers() {
         Map<String, Object> response = new HashMap<>();
-        
         try {
             List<User> users = userService.findAll();
+            List<UserResponse> userResponses = users.stream()
+                .map(UserResponse::new)
+                .toList();
             response.put("success", true);
-            response.put("data", users);
+            response.put("data", userResponses);
             return ResponseEntity.ok(response);
-            
         } catch (Exception e) {
             response.put("success", false);
             response.put("message", "Error fetching users: " + e.getMessage());
@@ -41,7 +43,7 @@ public class UserPresenter {
             
             if (userOpt.isPresent()) {
                 response.put("success", true);
-                response.put("data", userOpt.get());
+                response.put("data", new UserResponse(userOpt.get()));
             } else {
                 response.put("success", false);
                 response.put("message", "User not found");
@@ -76,9 +78,8 @@ public class UserPresenter {
             
             User savedUser = userService.save(user);
             response.put("success", true);
-            response.put("data", savedUser);
+            response.put("data", new UserResponse(savedUser));
             response.put("message", "User created successfully");
-            
             return ResponseEntity.ok(response);
             
         } catch (Exception e) {
@@ -92,30 +93,38 @@ public class UserPresenter {
         Map<String, Object> response = new HashMap<>();
         
         try {
+            System.out.println("[UserPresenter] Update request for user id: " + id);
             Optional<User> userOpt = userService.findById(id);
-            
             if (userOpt.isPresent()) {
                 User user = userOpt.get();
+                System.out.println("[UserPresenter] Editando usuario: " + user.getId() + " rol actual: " + user.getRole());
                 user.setFirstName(userRequest.getFirstName());
                 user.setLastName(userRequest.getLastName());
                 user.setPhoneNumber(userRequest.getPhoneNumber());
-                
                 if (userRequest.getRole() != null) {
-                    user.setRole(User.UserRole.valueOf(userRequest.getRole()));
+                    try {
+                        user.setRole(User.UserRole.valueOf(userRequest.getRole()));
+                    } catch (Exception ex) {
+                        System.err.println("[UserPresenter] Error al asignar rol: " + userRequest.getRole());
+                        response.put("success", false);
+                        response.put("message", "Rol inválido: " + userRequest.getRole());
+                        return ResponseEntity.badRequest().body(response);
+                    }
                 }
-                
                 User updatedUser = userService.update(user);
+                System.out.println("[UserPresenter] Usuario actualizado: " + updatedUser.getId() + " nuevo rol: " + updatedUser.getRole());
                 response.put("success", true);
-                response.put("data", updatedUser);
+                response.put("data", new UserResponse(updatedUser));
                 response.put("message", "User updated successfully");
             } else {
+                System.out.println("[UserPresenter] Usuario no encontrado para id: " + id);
                 response.put("success", false);
                 response.put("message", "User not found");
             }
-            
             return ResponseEntity.ok(response);
-            
         } catch (Exception e) {
+            System.err.println("[UserPresenter] Error updating user: " + e.getMessage());
+            e.printStackTrace();
             response.put("success", false);
             response.put("message", "Error updating user: " + e.getMessage());
             return ResponseEntity.internalServerError().body(response);
@@ -149,8 +158,11 @@ public class UserPresenter {
         
         try {
             List<User> users = userService.searchUsers(searchTerm);
+            List<UserResponse> userResponses = users.stream()
+                .map(UserResponse::new)
+                .toList();
             response.put("success", true);
-            response.put("data", users);
+            response.put("data", userResponses);
             return ResponseEntity.ok(response);
             
         } catch (Exception e) {

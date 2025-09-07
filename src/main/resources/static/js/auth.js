@@ -12,12 +12,10 @@ class AuthService {
     async login(email, password, twoFactorCode = null) {
         try {
             console.log('🔐 Attempting login for:', email);
-            
             const loginData = { email, password };
             if (twoFactorCode) {
                 loginData.twoFactorCode = twoFactorCode;
             }
-            
             const response = await fetch(`${this.baseURL}/login`, {
                 method: 'POST',
                 headers: {
@@ -25,42 +23,44 @@ class AuthService {
                 },
                 body: JSON.stringify(loginData)
             });
-
             console.log('📡 Login response status:', response.status);
-            
             const data = await response.json();
             console.log('📨 Login response data:', data);
-
             if (data.success) {
                 if (data.requiresTwoFactor) {
                     console.log('🔐 Two-factor authentication required');
                     return { success: true, requiresTwoFactor: true };
                 }
-
                 // Verificar que tenemos los datos necesarios
                 if (!data.data || !data.data.token || !data.data.user) {
                     console.error('❌ Invalid response structure:', data);
+                    showAlert('Respuesta del servidor inválida', 'error');
                     return { success: false, message: 'Respuesta del servidor inválida' };
                 }
-
                 this.token = data.data.token;
                 this.user = data.data.user;
-                
                 localStorage.setItem('authToken', this.token);
                 localStorage.setItem('user', JSON.stringify(this.user));
-                
+                // Validar que se guardó correctamente
+                const tokenStored = localStorage.getItem('authToken');
+                const userStored = localStorage.getItem('user');
+                if (!tokenStored || !userStored) {
+                    showAlert('No se pudo guardar la sesión en el navegador', 'error');
+                    console.error('❌ No se guardó token o usuario en localStorage');
+                    return { success: false, message: 'No se pudo guardar la sesión' };
+                }
                 console.log('✅ Login successful, token saved');
                 console.log('🔑 Token:', this.token.substring(0, 20) + '...');
                 console.log('👤 User:', this.user);
-                
+                showAlert('Sesión iniciada correctamente', 'success');
                 return { success: true };
             }
-
             console.log('❌ Login failed:', data.message);
+            showAlert(data.message || 'Error al iniciar sesión', 'error');
             return { success: false, message: data.message };
-            
         } catch (error) {
             console.error('❌ Login error:', error);
+            showAlert('Error de conexión', 'error');
             return { success: false, message: 'Error de conexión' };
         }
     }
