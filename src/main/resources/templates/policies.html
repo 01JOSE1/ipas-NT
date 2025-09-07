@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPAS - Gestión de Pólizas</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>IPAS</h2>
+            </div>
+            <div class="sidebar-nav">
+                <a href="/dashboard" class="nav-item">
+                    <span>📊 Panel de Control</span>
+                </a>
+                <a href="/clients" class="nav-item">
+                    <span>👥 Clientes</span>
+                </a>
+                <a href="/policies" class="nav-item active">
+                    <span>📋 Pólizas</span>
+                </a>
+                <a href="/users" class="nav-item" id="usersNav" style="display: none;">
+                    <span>👤 Usuarios</span>
+                </a>
+                <a href="/profile" class="nav-item">
+                    <span>⚙️ Perfil</span>
+                </a>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div class="header">
+                <button class="mobile-menu-toggle" id="menuToggle">☰</button>
+                <h1 class="header-title">Gestión de Pólizas</h1>
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar"></div>
+                    <span id="userName">Usuario</span>
+                    <button class="logout-btn" onclick="authService.logout()">Cerrar Sesión</button>
+                </div>
+            </div>
+
+            <div class="page-header">
+                <div class="search-container">
+                    <input type="text" id="searchInput" class="search-input" placeholder="Buscar pólizas...">
+                    <span class="search-icon">🔍</span>
+                </div>
+                <button class="btn btn-primary" onclick="openPolicyModal()">+ Nueva Póliza</button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Lista de Pólizas</h3>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Número</th>
+                                    <th>Tipo</th>
+                                    <th>Cliente</th>
+                                    <th>Prima</th>
+                                    <th>Estado</th>
+                                    <th>Vencimiento</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="policiesTable">
+                                <tr>
+                                    <td colspan="7" class="text-center">Cargando pólizas...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Policy Modal -->
+    <div id="policyModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Nueva Póliza</h3>
+                <button class="modal-close" onclick="closePolicyModal()">&times;</button>
+            </div>
+            <form id="policyForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="clientSelect" class="form-label">Cliente</label>
+                        <select id="clientSelect" name="clientId" class="form-select" required>
+                            <option value="">Seleccionar cliente...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="policyType" class="form-label">Tipo de Póliza</label>
+                        <select id="policyType" name="policyType" class="form-select" required>
+                            <option value="">Seleccionar tipo...</option>
+                            <option value="VIDA">Seguro de Vida</option>
+                            <option value="AUTOMOVIL">Seguro de Automóvil</option>
+                            <option value="HOGAR">Seguro de Hogar</option>
+                            <option value="SALUD">Seguro de Salud</option>
+                            <option value="NEGOCIO">Seguro de Negocio</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="premiumAmount" class="form-label">Prima (S/)</label>
+                        <input type="number" id="premiumAmount" name="premiumAmount" class="form-input" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="coverageAmount" class="form-label">Monto de Cobertura (S/)</label>
+                        <input type="number" id="coverageAmount" name="coverageAmount" class="form-input" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="startDate" class="form-label">Fecha de Inicio</label>
+                        <input type="date" id="startDate" name="startDate" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="endDate" class="form-label">Fecha de Vencimiento</label>
+                        <input type="date" id="endDate" name="endDate" class="form-input" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="coverage" class="form-label">Descripción de Cobertura</label>
+                    <textarea id="coverage" name="coverage" class="form-input form-textarea" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="beneficiaries" class="form-label">Beneficiarios</label>
+                    <textarea id="beneficiaries" name="beneficiaries" class="form-input form-textarea"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="deductible" class="form-label">Deducible (S/)</label>
+                    <input type="number" id="deductible" name="deductible" class="form-input" min="0" step="0.01">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closePolicyModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="savePolicyBtn">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let policies = [];
+        let editingPolicyId = null;
+
+        // Load initial data
+        loadPolicies();
+        loadClientsForSelect();
+
+        // Setup event listeners
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            if (query.length >= 2) {
+                searchPolicies(query);
+            } else if (query.length === 0) {
+                loadPolicies();
+            }
+        });
+
+        document.getElementById('policyForm').addEventListener('submit', handlePolicySubmit);
+
+        async function loadPolicies() {
+            try {
+                const response = await apiService.getPolicies();
+                
+                if (response && response.success) {
+                    policies = response.data;
+                    renderPoliciesTable(policies);
+                } else {
+                    showAlert('Error al cargar pólizas');
+                }
+            } catch (error) {
+                console.error('Error loading policies:', error);
+                showAlert('Error de conexión al cargar pólizas');
+            }
+        }
+
+        async function loadClientsForSelect() {
+            try {
+                const response = await apiService.getClients();
+                
+                if (response && response.success) {
+                    const select = document.getElementById('clientSelect');
+                    select.innerHTML = '<option value="">Seleccionar cliente...</option>' +
+                        response.data.map(client => 
+                            `<option value="${client.id}">${client.firstName} ${client.lastName} - ${client.documentNumber}</option>`
+                        ).join('');
+                }
+            } catch (error) {
+                console.error('Error loading clients for select:', error);
+            }
+        }
+
+        async function searchPolicies(query) {
+            try {
+                const response = await apiService.searchPolicies(query);
+                
+                if (response && response.success) {
+                    renderPoliciesTable(response.data);
+                } else {
+                    showAlert('Error en la búsqueda');
+                }
+            } catch (error) {
+                console.error('Error searching policies:', error);
+                showAlert('Error de conexión en la búsqueda');
+            }
+        }
+
+        function renderPoliciesTable(policyList) {
+            const tbody = document.getElementById('policiesTable');
+            
+            if (policyList.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center">No se encontraron pólizas</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = policyList.map(policy => `
+                <tr>
+                    <td>${policy.policyNumber}</td>
+                    <td>${policy.policyType}</td>
+                    <td>${policy.client.firstName} ${policy.client.lastName}</td>
+                    <td>${formatCurrency(policy.premiumAmount)}</td>
+                    <td>
+                        <span class="badge badge-${getPolicyStatusColor(policy.status)}">
+                            ${getPolicyStatusText(policy.status)}
+                        </span>
+                    </td>
+                    <td>${formatDate(policy.endDate)}</td>
+                    <td>
+                        <div class="actions">
+                            <button class="action-button" onclick="editPolicy(${policy.id})" title="Editar">
+                                ✏️
+                            </button>
+                            <button class="action-button" onclick="viewPolicyDetails(${policy.id})" title="Ver Detalles">
+                                👁️
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function getPolicyStatusColor(status) {
+            switch (status) {
+                case 'ACTIVE': return 'success';
+                case 'EXPIRED': return 'warning';
+                case 'CANCELLED': return 'error';
+                case 'SUSPENDED': return 'error';
+                default: return 'secondary';
+            }
+        }
+
+        function getPolicyStatusText(status) {
+            switch (status) {
+                case 'ACTIVE': return 'Activa';
+                case 'INACTIVE': return 'Inactiva';
+                case 'EXPIRED': return 'Vencida';
+                case 'CANCELLED': return 'Cancelada';
+                case 'SUSPENDED': return 'Suspendida';
+                default: return status;
+            }
+        }
+
+        function openPolicyModal(policyData = null) {
+            const modal = document.getElementById('policyModal');
+            const form = document.getElementById('policyForm');
+            const title = document.getElementById('modalTitle');
+            
+            if (policyData) {
+                title.textContent = 'Editar Póliza';
+                fillPolicyForm(policyData);
+                editingPolicyId = policyData.id;
+            } else {
+                title.textContent = 'Nueva Póliza';
+                form.reset();
+                editingPolicyId = null;
+            }
+            
+            modal.classList.add('show');
+        }
+
+        function closePolicyModal() {
+            const modal = document.getElementById('policyModal');
+            modal.classList.remove('show');
+            editingPolicyId = null;
+        }
+
+        function fillPolicyForm(policy) {
+            document.getElementById('clientSelect').value = policy.client.id;
+            document.getElementById('policyType').value = policy.policyType;
+            document.getElementById('premiumAmount').value = policy.premiumAmount;
+            document.getElementById('coverageAmount').value = policy.coverageAmount;
+            document.getElementById('startDate').value = policy.startDate;
+            document.getElementById('endDate').value = policy.endDate;
+            document.getElementById('coverage').value = policy.coverage;
+            document.getElementById('beneficiaries').value = policy.beneficiaries || '';
+            document.getElementById('deductible').value = policy.deductible || '';
+        }
+
+        async function handlePolicySubmit(e) {
+            e.preventDefault();
+            
+            const saveBtn = document.getElementById('savePolicyBtn');
+            showLoading(saveBtn, true);
+            
+            const formData = new FormData(e.target);
+            const policyData = {
+                clientId: parseInt(formData.get('clientId')),
+                policyType: formData.get('policyType'),
+                premiumAmount: parseFloat(formData.get('premiumAmount')),
+                coverageAmount: parseFloat(formData.get('coverageAmount')),
+                startDate: formData.get('startDate'),
+                endDate: formData.get('endDate'),
+                coverage: formData.get('coverage'),
+                beneficiaries: formData.get('beneficiaries') || null,
+                deductible: formData.get('deductible') ? parseFloat(formData.get('deductible')) : null
+            };
+            
+            try {
+                let response;
+                if (editingPolicyId) {
+                    response = await apiService.updatePolicy(editingPolicyId, policyData);
+                } else {
+                    response = await apiService.createPolicy(policyData);
+                }
+                
+                showLoading(saveBtn, false);
+                
+                if (response && response.success) {
+                    showAlert(response.message || 'Póliza guardada exitosamente', 'success');
+                    closePolicyModal();
+                    loadPolicies();
+                } else {
+                    showAlert(response?.message || 'Error al guardar póliza');
+                }
+            } catch (error) {
+                showLoading(saveBtn, false);
+                console.error('Error saving policy:', error);
+                showAlert('Error de conexión al guardar póliza');
+            }
+        }
+
+        async function editPolicy(policyId) {
+            try {
+                const response = await apiService.getPolicy(policyId);
+                
+                if (response && response.success) {
+                    openPolicyModal(response.data);
+                } else {
+                    showAlert('Error al cargar póliza');
+                }
+            } catch (error) {
+                console.error('Error loading policy for edit:', error);
+                showAlert('Error de conexión al cargar póliza');
+            }
+        }
+
+        function viewPolicyDetails(policyId) {
+            // Could implement a detailed view modal here
+            editPolicy(policyId);
+        }
+
+        // Close modal on outside click
+        document.getElementById('policyModal').addEventListener('click', (e) => {
+            if (e.target.id === 'policyModal') {
+                closePolicyModal();
+            }
+        });
+
+        // Filter policies by client if clientId in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const clientId = urlParams.get('clientId');
+        if (clientId) {
+            // Filter policies by client
+            const filteredPolicies = policies.filter(p => p.client.id.toString() === clientId);
+            renderPoliciesTable(filteredPolicies);
+        }
+    </script>
+
+    <script src="/js/auth.js"></script>
+    <script src="/js/api.js"></script>
+</body>
+</html>

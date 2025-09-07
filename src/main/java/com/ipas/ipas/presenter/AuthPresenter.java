@@ -1,0 +1,119 @@
+package com.ipas.ipas.presenter;
+
+import com.ipas.ipas.model.entity.User;
+import com.ipas.ipas.model.service.UserService;
+import com.ipas.ipas.security.JwtUtil;
+import com.ipas.ipas.view.dto.LoginRequest;
+import com.ipas.ipas.view.dto.LoginResponse;
+import com.ipas.ipas.view.dto.PasswordResetRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
+@Component
+public class AuthPresenter {
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    public ResponseEntity<Map<String, Object>> handleLogin(LoginRequest loginRequest) {
+        Map<String, Object> response = new HashMap<>();
+
+        System.out.println("Intentando login con email: " + loginRequest.getEmail());
+
+        try {
+            boolean isAuthenticated = userService.authenticate(
+                    loginRequest.getEmail(),
+                    loginRequest.getPassword());
+
+            if (isAuthenticated) {
+                Optional<User> userOpt = userService.findByEmail(loginRequest.getEmail());
+                if (userOpt.isPresent()) {
+                    User user = userOpt.get();
+
+                    if (user.getTwoFactorEnabled() &&
+                            (loginRequest.getTwoFactorCode() == null || loginRequest.getTwoFactorCode().isEmpty())) {
+                        response.put("success", false);
+                        response.put("message", "Two factor authentication required");
+                        response.put("requiresTwoFactor", true);
+                        return ResponseEntity.ok(response);
+                    }
+
+                    String token = jwtUtil.generateToken(user.getEmail());
+                    System.out.println("Token generado: " + token); // <-- Agrega este log
+                    userService.updateLastLogin(user.getId());
+
+                    LoginResponse loginResponse = new LoginResponse();
+                    loginResponse.setToken(token);
+                    loginResponse.setUser(user);
+
+                    response.put("success", true);
+                    response.put("data", loginResponse);
+                    response.put("message", "Login successful");
+                    return ResponseEntity.ok(response);
+                }
+            }
+
+            response.put("success", false);
+            response.put("message", "Invalid credentials");
+            return ResponseEntity.badRequest().body(response);
+
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Login error: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+    public ResponseEntity<Map<String, Object>> handlePasswordReset(PasswordResetRequest request) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            boolean emailSent = userService.generateResetPasswordToken(request.getEmail());
+
+            if (emailSent) {
+                response.put("success", true);
+                response.put("message", "Password reset email sent");
+            } else {
+                response.put("success", false);
+                response.put("message", "Email not found");
+            }
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Error processing request: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+    public ResponseEntity<Map<String, Object>> handleNewPassword(String token, String newPassword) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            boolean passwordReset = userService.resetPassword(token, newPassword);
+
+            if (passwordReset) {
+                response.put("success", true);
+                response.put("message", "Password updated successfully");
+            } else {
+                response.put("success", false);
+                response.put("message", "Invalid or expired token");
+            }
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Error updating password: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+}

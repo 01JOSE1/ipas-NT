@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPAS - Panel de Control</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Loading screen mientras verificamos auth -->
+    <div id="loadingScreen" style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #f8fafc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        font-family: Inter, sans-serif;
+    ">
+        <div style="text-align: center;">
+            <div style="
+                width: 50px;
+                height: 50px;
+                border: 4px solid #e2e8f0;
+                border-top: 4px solid #3b82f6;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                margin: 0 auto 20px;
+            "></div>
+            <p style="color: #64748b; margin: 0;">Verificando autenticación...</p>
+        </div>
+    </div>
+
+    <style>
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .dashboard-content {
+            display: none;
+        }
+        
+        .dashboard-content.show {
+            display: block;
+        }
+    </style>
+
+    <div class="dashboard-content" id="dashboardContent">
+        <div class="dashboard-container">
+            <nav class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <h2>IPAS</h2>
+                </div>
+                <div class="sidebar-nav">
+                    <a href="/dashboard" class="nav-item active">
+                        <span>📊 Panel de Control</span>
+                    </a>
+                    <a href="/clients" class="nav-item">
+                        <span>👥 Clientes</span>
+                    </a>
+                    <a href="/policies" class="nav-item">
+                        <span>📋 Pólizas</span>
+                    </a>
+                    <a href="/users" class="nav-item" id="usersNav" style="display: none;">
+                        <span>👤 Usuarios</span>
+                    </a>
+                    <a href="/profile" class="nav-item">
+                        <span>⚙️ Perfil</span>
+                    </a>
+                </div>
+            </nav>
+
+            <main class="main-content">
+                <div class="header">
+                    <button class="mobile-menu-toggle" id="menuToggle">☰</button>
+                    <h1 class="header-title">Panel de Control</h1>
+                    <div class="user-info">
+                        <div class="user-avatar" id="userAvatar"></div>
+                        <span id="userName">Usuario</span>
+                        <button class="logout-btn" onclick="authService.logout()">Cerrar Sesión</button>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalClients">0</div>
+                        <div class="stat-label">Total Clientes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalPolicies">0</div>
+                        <div class="stat-label">Total Pólizas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="activePolicies">0</div>
+                        <div class="stat-label">Pólizas Activas</div>
+                    </div>
+                    <div class="stat-card" id="totalUsersCard" style="display: none;">
+                        <div class="stat-value" id="totalUsers">0</div>
+                        <div class="stat-label">Total Usuarios</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Actividad Reciente</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="recentActivity">
+                            <p class="text-center" style="color: var(--text-secondary);">
+                                Cargando actividad reciente...
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="/js/auth.js"></script>
+    <script src="/js/api.js"></script>
+    <script>
+        console.log('🏁 Dashboard script starting...');
+        
+        // Función para ocultar loading y mostrar dashboard
+        function showDashboard() {
+            document.getElementById('loadingScreen').style.display = 'none';
+            document.getElementById('dashboardContent').classList.add('show');
+        }
+        
+        // Función para mostrar error y redirigir
+        function showErrorAndRedirect(message) {
+            document.getElementById('loadingScreen').innerHTML = `
+                <div style="text-align: center;">
+                    <div style="color: #ef4444; font-size: 48px; margin-bottom: 20px;">❌</div>
+                    <p style="color: #ef4444; margin: 0 0 20px; font-weight: 500;">${message}</p>
+                    <p style="color: #64748b; margin: 0;">Redirigiendo al login...</p>
+                </div>
+            `;
+            
+            setTimeout(() => {
+                window.location.href = '/login';
+            }, 2000);
+        }
+
+        // Verificar autenticación de manera asíncrona
+        async function initializeDashboard() {
+            try {
+                console.log('🔍 Checking authentication...');
+                
+                // Verificar si está autenticado
+                if (!authService.isAuthenticated()) {
+                    console.log('❌ Not authenticated');
+                    showErrorAndRedirect('No estás autenticado');
+                    return;
+                }
+
+                const user = authService.getUser();
+                if (!user) {
+                    console.log('❌ No user data found');
+                    showErrorAndRedirect('Datos de usuario no encontrados');
+                    return;
+                }
+
+                console.log('✅ Authentication verified, user:', user);
+
+                // Setup user info
+                document.getElementById('userName').textContent = `${user.firstName} ${user.lastName}`;
+                document.getElementById('userAvatar').textContent = user.firstName.charAt(0).toUpperCase();
+                
+                // Show admin-only elements
+                if (user.role === 'ADMINISTRADOR') {
+                    console.log('👑 Admin user detected, showing admin elements');
+                    document.getElementById('usersNav').style.display = 'block';
+                    document.getElementById('totalUsersCard').style.display = 'block';
+                }
+                
+                // Mobile menu toggle
+                document.getElementById('menuToggle').addEventListener('click', () => {
+                    document.getElementById('sidebar').classList.toggle('open');
+                });
+                
+                // Show dashboard
+                showDashboard();
+                
+                // Load dashboard data
+                console.log('📊 Loading dashboard data...');
+                await loadDashboardData();
+                
+            } catch (error) {
+                console.error('❌ Error initializing dashboard:', error);
+                showErrorAndRedirect('Error al inicializar el dashboard');
+            }
+        }
+
+        async function loadDashboardData() {
+            try {
+                console.log('📡 Making API calls...');
+                
+                const [clientsData, policiesData] = await Promise.all([
+                    apiService.getClients(),
+                    apiService.getPolicies()
+                ]);
+                
+                console.log('📨 Clients data:', clientsData);
+                console.log('📨 Policies data:', policiesData);
+                
+                if (clientsData && clientsData.success) {
+                    document.getElementById('totalClients').textContent = clientsData.data.length;
+                } else {
+                    console.warn('⚠️ Invalid clients data:', clientsData);
+                }
+                
+                if (policiesData && policiesData.success) {
+                    const policies = policiesData.data;
+                    document.getElementById('totalPolicies').textContent = policies.length;
+                    
+                    const activePolicies = policies.filter(p => p.status === 'ACTIVE');
+                    document.getElementById('activePolicies').textContent = activePolicies.length;
+                    
+                    // Show recent activity
+                    const recentPolicies = policies.slice(0, 5);
+                    const activityHTML = recentPolicies.map(policy => `
+                        <div style="padding: 0.5rem 0; border-bottom: 1px solid var(--border-light);">
+                            <strong>Póliza ${policy.policyNumber}</strong> - ${policy.policyType}
+                            <br>
+                            <small style="color: var(--text-secondary);">
+                                Cliente: ${policy.client.firstName} ${policy.client.lastName}
+                            </small>
+                        </div>
+                    `).join('');
+                    
+                    document.getElementById('recentActivity').innerHTML = activityHTML || 
+                        '<p class="text-center" style="color: var(--text-secondary);">No hay actividad reciente</p>';
+                } else {
+                    console.warn('⚠️ Invalid policies data:', policiesData);
+                }
+                
+                // Load user stats for admin
+                if (authService.hasRole('ADMINISTRADOR')) {
+                    console.log('👑 Loading admin stats...');
+                    try {
+                        const usersData = await apiService.getUsers();
+                        console.log('📨 Users data:', usersData);
+                        
+                        if (usersData && usersData.success) {
+                            document.getElementById('totalUsers').textContent = usersData.data.length;
+                        }
+                    } catch (error) {
+                        console.error('❌ Error loading users data:', error);
+                    }
+                }
+                
+                console.log('✅ Dashboard data loaded successfully');
+                
+            } catch (error) {
+                console.error('❌ Error loading dashboard data:', error);
+                document.getElementById('recentActivity').innerHTML = 
+                    '<p class="text-center" style="color: var(--error-red);">Error cargando datos</p>';
+            }
+        }
+
+        // Inicializar dashboard cuando se carga la página
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('📄 DOM loaded, initializing dashboard...');
+            initializeDashboard();
+        });
+        
+        // Fallback si DOMContentLoaded ya pasó
+        if (document.readyState === 'loading') {
+            console.log('📄 Document still loading...');
+        } else {
+            console.log('📄 Document already loaded, initializing immediately...');
+            initializeDashboard();
+        }
+    </script>
+</body>
+</html>

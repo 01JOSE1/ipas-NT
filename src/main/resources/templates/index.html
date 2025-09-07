@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPAS - Sistema de Gestión de Pólizas de Seguros</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>IPAS</h1>
+                <p>Sistema de Gestión de Pólizas de Seguros</p>
+            </div>
+            
+            <div class="text-center">
+                <p style="margin-bottom: 1.5rem; color: var(--text-secondary);">
+                    Bienvenido al sistema de gestión de pólizas de seguros más avanzado y seguro.
+                </p>
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <h3 style="color: var(--primary-blue); margin-bottom: 1rem;">Características principales:</h3>
+                    <ul style="text-align: left; color: var(--text-secondary); line-height: 1.8;">
+                        <li>✅ Gestión completa de clientes y pólizas</li>
+                        <li>🔐 Autenticación segura con 2FA opcional</li>
+                        <li>👥 Sistema de roles (Administrador/Asesor)</li>
+                        <li>📊 Panel de control con estadísticas</li>
+                        <li>🔍 Búsqueda avanzada y filtros</li>
+                        <li>📱 Diseño responsivo para todos los dispositivos</li>
+                    </ul>
+                </div>
+                
+                <a href="/login" class="btn btn-primary btn-full">Iniciar Sesión</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/auth.js"></script>
+    <script>
+        // Redirect if already authenticated
+        authService.redirectIfAuthenticated();
+    </script>
+</body>
+</html>

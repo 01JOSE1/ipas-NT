@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPAS - Gestión de Clientes</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>IPAS</h2>
+            </div>
+            <div class="sidebar-nav">
+                <a href="/dashboard" class="nav-item">
+                    <span>📊 Panel de Control</span>
+                </a>
+                <a href="/clients" class="nav-item active">
+                    <span>👥 Clientes</span>
+                </a>
+                <a href="/policies" class="nav-item">
+                    <span>📋 Pólizas</span>
+                </a>
+                <a href="/users" class="nav-item" id="usersNav" style="display: none;">
+                    <span>👤 Usuarios</span>
+                </a>
+                <a href="/profile" class="nav-item">
+                    <span>⚙️ Perfil</span>
+                </a>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div class="header">
+                <button class="mobile-menu-toggle" id="menuToggle">☰</button>
+                <h1 class="header-title">Gestión de Clientes</h1>
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar"></div>
+                    <span id="userName">Usuario</span>
+                    <button class="logout-btn" onclick="authService.logout()">Cerrar Sesión</button>
+                </div>
+            </div>
+
+            <div class="page-header">
+                <div class="search-container">
+                    <input type="text" id="searchInput" class="search-input" placeholder="Buscar clientes...">
+                    <span class="search-icon">🔍</span>
+                </div>
+                <button class="btn btn-primary" onclick="openClientModal()">+ Nuevo Cliente</button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Lista de Clientes</h3>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Documento</th>
+                                    <th>Nombre</th>
+                                    <th>Email</th>
+                                    <th>Teléfono</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="clientsTable">
+                                <tr>
+                                    <td colspan="6" class="text-center">Cargando clientes...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Client Modal -->
+    <div id="clientModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Nuevo Cliente</h3>
+                <button class="modal-close" onclick="closeClientModal()">&times;</button>
+            </div>
+            <form id="clientForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="documentType" class="form-label">Tipo de Documento</label>
+                        <select id="documentType" name="documentType" class="form-select" required>
+                            <option value="DNI">DNI</option>
+                            <option value="PASSPORT">Pasaporte</option>
+                            <option value="CARNET_EXTRANJERIA">Carnet de Extranjería</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="documentNumber" class="form-label">Número de Documento</label>
+                        <input type="text" id="documentNumber" name="documentNumber" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="firstName" class="form-label">Nombres</label>
+                        <input type="text" id="firstName" name="firstName" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName" class="form-label">Apellidos</label>
+                        <input type="text" id="lastName" name="lastName" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" id="email" name="email" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="phoneNumber" class="form-label">Teléfono</label>
+                        <input type="tel" id="phoneNumber" name="phoneNumber" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="birthDate" class="form-label">Fecha de Nacimiento</label>
+                        <input type="date" id="birthDate" name="birthDate" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="occupation" class="form-label">Ocupación</label>
+                        <input type="text" id="occupation" name="occupation" class="form-input">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="address" class="form-label">Dirección</label>
+                    <textarea id="address" name="address" class="form-input form-textarea"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeClientModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="saveClientBtn">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/auth.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/js/clients.js"></script>
+</body>
+</html>

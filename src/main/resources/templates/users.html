@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPAS - Gestión de Usuarios</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>IPAS</h2>
+            </div>
+            <div class="sidebar-nav">
+                <a href="/dashboard" class="nav-item">
+                    <span>📊 Panel de Control</span>
+                </a>
+                <a href="/clients" class="nav-item">
+                    <span>👥 Clientes</span>
+                </a>
+                <a href="/policies" class="nav-item">
+                    <span>📋 Pólizas</span>
+                </a>
+                <a href="/users" class="nav-item active">
+                    <span>👤 Usuarios</span>
+                </a>
+                <a href="/profile" class="nav-item">
+                    <span>⚙️ Perfil</span>
+                </a>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div class="header">
+                <button class="mobile-menu-toggle" id="menuToggle">☰</button>
+                <h1 class="header-title">Gestión de Usuarios</h1>
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar"></div>
+                    <span id="userName">Usuario</span>
+                    <button class="logout-btn" onclick="authService.logout()">Cerrar Sesión</button>
+                </div>
+            </div>
+
+            <div class="page-header">
+                <div class="search-container">
+                    <input type="text" id="searchInput" class="search-input" placeholder="Buscar usuarios...">
+                    <span class="search-icon">🔍</span>
+                </div>
+                <button class="btn btn-primary" onclick="openUserModal()">+ Nuevo Usuario</button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Lista de Usuarios</h3>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Email</th>
+                                    <th>Rol</th>
+                                    <th>Estado</th>
+                                    <th>Último Acceso</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTable">
+                                <tr>
+                                    <td colspan="6" class="text-center">Cargando usuarios...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- User Modal -->
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Nuevo Usuario</h3>
+                <button class="modal-close" onclick="closeUserModal()">&times;</button>
+            </div>
+            <form id="userForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="firstName" class="form-label">Nombres</label>
+                        <input type="text" id="firstName" name="firstName" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName" class="form-label">Apellidos</label>
+                        <input type="text" id="lastName" name="lastName" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" id="email" name="email" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phoneNumber" class="form-label">Teléfono</label>
+                        <input type="tel" id="phoneNumber" name="phoneNumber" class="form-input">
+                    </div>
+                    <div class="form-group" id="passwordGroup">
+                        <label for="password" class="form-label">Contraseña</label>
+                        <input type="password" id="password" name="password" class="form-input" minlength="8" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="role" class="form-label">Rol</label>
+                        <select id="role" name="role" class="form-select" required>
+                            <option value="">Seleccionar rol...</option>
+                            <option value="ASESOR">Asesor</option>
+                            <option value="ADMINISTRADOR">Administrador</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeUserModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="saveUserBtn">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/auth.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/js/users.js"></script>
+</body>
+</html>

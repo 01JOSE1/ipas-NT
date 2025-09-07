@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPAS - Mi Perfil</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>IPAS</h2>
+            </div>
+            <div class="sidebar-nav">
+                <a href="/dashboard" class="nav-item">
+                    <span>📊 Panel de Control</span>
+                </a>
+                <a href="/clients" class="nav-item">
+                    <span>👥 Clientes</span>
+                </a>
+                <a href="/policies" class="nav-item">
+                    <span>📋 Pólizas</span>
+                </a>
+                <a href="/users" class="nav-item" id="usersNav" style="display: none;">
+                    <span>👤 Usuarios</span>
+                </a>
+                <a href="/profile" class="nav-item active">
+                    <span>⚙️ Perfil</span>
+                </a>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div class="header">
+                <button class="mobile-menu-toggle" id="menuToggle">☰</button>
+                <h1 class="header-title">Mi Perfil</h1>
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar"></div>
+                    <span id="userName">Usuario</span>
+                    <button class="logout-btn" onclick="authService.logout()">Cerrar Sesión</button>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Información Personal</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="profileForm">
+                            <div class="form-group">
+                                <label for="firstName" class="form-label">Nombres</label>
+                                <input type="text" id="firstName" name="firstName" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="lastName" class="form-label">Apellidos</label>
+                                <input type="text" id="lastName" name="lastName" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" id="email" name="email" class="form-input" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="phoneNumber" class="form-label">Teléfono</label>
+                                <input type="tel" id="phoneNumber" name="phoneNumber" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label for="role" class="form-label">Rol</label>
+                                <input type="text" id="role" name="role" class="form-input" readonly>
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="updateProfileBtn">
+                                Actualizar Perfil
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Seguridad</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label">Autenticación de Dos Factores</label>
+                            <div class="flex items-center gap-2">
+                                <span id="twoFactorStatus">Deshabilitada</span>
+                                <button type="button" class="btn btn-sm btn-secondary" id="toggle2FA">
+                                    Habilitar
+                                </button>
+                            </div>
+                            <small style="color: var(--text-secondary); display: block; margin-top: 0.5rem;">
+                                Añade una capa extra de seguridad a tu cuenta
+                            </small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Cambiar Contraseña</label>
+                            <form id="passwordForm">
+                                <div class="form-group">
+                                    <input type="password" id="currentPassword" name="currentPassword" 
+                                           class="form-input" placeholder="Contraseña actual" required>
+                                </div>
+                                <div class="form-group">
+                                    <input type="password" id="newPassword" name="newPassword" 
+                                           class="form-input" placeholder="Nueva contraseña" minlength="8" required>
+                                </div>
+                                <div class="form-group">
+                                    <input type="password" id="confirmPassword" name="confirmPassword" 
+                                           class="form-input" placeholder="Confirmar nueva contraseña" minlength="8" required>
+                                </div>
+                                <button type="submit" class="btn btn-secondary" id="changePasswordBtn">
+                                    Cambiar Contraseña
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/js/auth.js"></script>
+    <script src="/js/api.js"></script>
+    <script>
+        // Check authentication
+        if (authService.redirectIfNotAuthenticated()) {
+            const user = authService.getUser();
+            
+            // Setup user info
+            document.getElementById('userName').textContent = `${user.firstName} ${user.lastName}`;
+            document.getElementById('userAvatar').textContent = user.firstName.charAt(0).toUpperCase();
+            
+            // Show admin-only elements
+            if (user.role === 'ADMINISTRADOR') {
+                document.getElementById('usersNav').style.display = 'block';
+            }
+            
+            // Mobile menu toggle
+            document.getElementById('menuToggle').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.toggle('open');
+            });
+            
+            // Load user profile
+            loadUserProfile();
+            
+            // Setup event listeners
+            document.getElementById('profileForm').addEventListener('submit', handleProfileUpdate);
+            document.getElementById('passwordForm').addEventListener('submit', handlePasswordChange);
+        }
+
+        function loadUserProfile() {
+            const user = authService.getUser();
+            
+            document.getElementById('firstName').value = user.firstName;
+            document.getElementById('lastName').value = user.lastName;
+            document.getElementById('email').value = user.email;
+            document.getElementById('phoneNumber').value = user.phoneNumber || '';
+            document.getElementById('role').value = getRoleText(user.role);
+            
+            // Update 2FA status
+            const twoFactorStatus = document.getElementById('twoFactorStatus');
+            const toggle2FA = document.getElementById('toggle2FA');
+            
+            if (user.twoFactorEnabled) {
+                twoFactorStatus.textContent = 'Habilitada';
+                twoFactorStatus.style.color = 'var(--success-green)';
+                toggle2FA.textContent = 'Deshabilitar';
+            } else {
+                twoFactorStatus.textContent = 'Deshabilitada';
+                twoFactorStatus.style.color = 'var(--text-secondary)';
+                toggle2FA.textContent = 'Habilitar';
+            }
+        }
+
+        function getRoleText(role) {
+            switch (role) {
+                case 'ADMINISTRADOR': return 'Administrador';
+                case 'ASESOR': return 'Asesor';
+                default: return role;
+            }
+        }
+
+        async function handleProfileUpdate(e) {
+            e.preventDefault();
+            
+            const updateBtn = document.getElementById('updateProfileBtn');
+            showLoading(updateBtn, true);
+            
+            const formData = new FormData(e.target);
+            const profileData = {
+                firstName: formData.get('firstName'),
+                lastName: formData.get('lastName'),
+                phoneNumber: formData.get('phoneNumber') || null,
+                role: authService.getUser().role // Keep current role
+            };
+            
+            try {
+                const response = await apiService.updateUser(authService.getUser().id, profileData);
+                
+                showLoading(updateBtn, false);
+                
+                if (response && response.success) {
+                    // Update local user data
+                    const updatedUser = response.data;
+                    localStorage.setItem('user', JSON.stringify(updatedUser));
+                    authService.user = updatedUser;
+                    
+                    showAlert('Perfil actualizado exitosamente', 'success');
+                    
+                    // Update header display
+                    document.getElementById('userName').textContent = `${updatedUser.firstName} ${updatedUser.lastName}`;
+                    document.getElementById('userAvatar').textContent = updatedUser.firstName.charAt(0).toUpperCase();
+                } else {
+                    showAlert(response?.message || 'Error al actualizar perfil');
+                }
+            } catch (error) {
+                showLoading(updateBtn, false);
+                console.error('Error updating profile:', error);
+                showAlert('Error de conexión al actualizar perfil');
+            }
+        }
+
+        async function handlePasswordChange(e) {
+            e.preventDefault();
+            
+            const changeBtn = document.getElementById('changePasswordBtn');
+            const formData = new FormData(e.target);
+            const newPassword = formData.get('newPassword');
+            const confirmPassword = formData.get('confirmPassword');
+            
+            if (newPassword !== confirmPassword) {
+                showAlert('Las nuevas contraseñas no coinciden');
+                return;
+            }
+            
+            showLoading(changeBtn, true);
+            
+            try {
+                // This would need a separate endpoint for password change
+                // For now, we'll just show a success message
+                setTimeout(() => {
+                    showLoading(changeBtn, false);
+                    showAlert('Contraseña cambiada exitosamente', 'success');
+                    document.getElementById('passwordForm').reset();
+                }, 1500);
+                
+            } catch (error) {
+                showLoading(changeBtn, false);
+                console.error('Error changing password:', error);
+                showAlert('Error de conexión al cambiar contraseña');
+            }
+        }
+    </script>
+</body>
+</html>

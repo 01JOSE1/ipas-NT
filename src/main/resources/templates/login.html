@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPAS - Iniciar Sesión</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>IPAS</h1>
+                <p>Sistema de Gestión de Pólizas de Seguros</p>
+            </div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email" class="form-label">Correo Electrónico</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        class="form-input" 
+                        placeholder="usuario@ejemplo.com"
+                        required
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="password" class="form-label">Contraseña</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        class="form-input" 
+                        placeholder="Ingresa tu contraseña"
+                        required
+                    >
+                </div>
+                
+                <div class="form-group hidden" id="twoFactorGroup">
+                    <label for="twoFactorCode" class="form-label">Código de Autenticación (2FA)</label>
+                    <input 
+                        type="text" 
+                        id="twoFactorCode" 
+                        name="twoFactorCode" 
+                        class="form-input" 
+                        placeholder="123456"
+                        maxlength="6"
+                    >
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-full" id="loginBtn">
+                    Iniciar Sesión
+                </button>
+            </form>
+            
+            <div class="text-center mt-2">
+                <a href="/forgot-password" class="text-link">¿Olvidaste tu contraseña?</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/auth.js"></script>
+    <script>
+        // Redirect if already authenticated
+        if (authService.redirectIfAuthenticated()) {
+            const loginForm = document.getElementById('loginForm');
+            const loginBtn = document.getElementById('loginBtn');
+            const twoFactorGroup = document.getElementById('twoFactorGroup');
+            let requiresTwoFactor = false;
+
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const formData = new FormData(loginForm);
+                const email = formData.get('email');
+                const password = formData.get('password');
+                const twoFactorCode = formData.get('twoFactorCode');
+                
+                showLoading(loginBtn, true);
+                
+                const result = await authService.login(email, password, twoFactorCode);
+                
+                showLoading(loginBtn, false);
+                
+                if (result.success) {
+                    if (result.requiresTwoFactor) {
+                        requiresTwoFactor = true;
+                        twoFactorGroup.classList.remove('hidden');
+                        showAlert('Ingresa tu código de autenticación de dos factores', 'success');
+                        document.getElementById('twoFactorCode').focus();
+                        return;
+                    }
+                    
+                    window.location.href = '/dashboard';
+                } else {
+                    showAlert(result.message || 'Error al iniciar sesión');
+                    if (requiresTwoFactor) {
+                        twoFactorGroup.classList.add('hidden');
+                        requiresTwoFactor = false;
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
