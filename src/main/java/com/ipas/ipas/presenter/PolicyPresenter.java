@@ -14,6 +14,8 @@ import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import com.ipas.ipas.view.dto.PolicySimpleDTO;
 import java.util.Optional;
 
 @Component
@@ -51,8 +53,20 @@ public class PolicyPresenter {
                     .toList();
             }
             
+            // Mapear a DTO simple para evitar problemas de serialización
+            var policyDTOs = policies.stream().map(policy -> new PolicySimpleDTO(
+                policy.getId(),
+                policy.getPolicyNumber(),
+                policy.getPolicyType(),
+                policy.getCoverage(),
+                policy.getPremiumAmount(),
+                policy.getCoverageAmount(),
+                policy.getStartDate(),
+                policy.getEndDate(),
+                policy.getStatus() != null ? policy.getStatus().name() : null
+            )).collect(Collectors.toList());
             response.put("success", true);
-            response.put("data", policies);
+            response.put("data", policyDTOs);
             return ResponseEntity.ok(response);
             
         } catch (Exception e) {

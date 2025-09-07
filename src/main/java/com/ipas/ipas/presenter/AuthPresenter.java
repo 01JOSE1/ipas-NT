@@ -6,6 +6,7 @@ import com.ipas.ipas.security.JwtUtil;
 import com.ipas.ipas.view.dto.LoginRequest;
 import com.ipas.ipas.view.dto.LoginResponse;
 import com.ipas.ipas.view.dto.PasswordResetRequest;
+import com.ipas.ipas.view.dto.UserSimpleDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -51,7 +52,15 @@ public class AuthPresenter {
 
                     LoginResponse loginResponse = new LoginResponse();
                     loginResponse.setToken(token);
-                    loginResponse.setUser(user);
+                    // Usar DTO simple para evitar ciclos de serialización
+                    UserSimpleDTO userDto = new UserSimpleDTO(
+                        user.getId(),
+                        user.getEmail(),
+                        user.getFirstName(),
+                        user.getLastName(),
+                        user.getRole()
+                    );
+                    loginResponse.setUser(userDto);
 
                     response.put("success", true);
                     response.put("data", loginResponse);
