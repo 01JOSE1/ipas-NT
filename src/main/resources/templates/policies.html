@@ -62,7 +62,6 @@
                                 <tr>
                                     <th>Número</th>
                                     <th>Tipo</th>
-                                    <th>Cliente</th>
                                     <th>Prima</th>
                                     <th>Estado</th>
                                     <th>Vencimiento</th>
@@ -71,7 +70,7 @@
                             </thead>
                             <tbody id="policiesTable">
                                 <tr>
-                                    <td colspan="7" class="text-center">Cargando pólizas...</td>
+                                    <td colspan="6" class="text-center">Cargando pólizas...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -144,6 +143,9 @@
         </div>
     </div>
 
+    <script src="/js/auth.js"></script>
+    <script src="/js/api.js"></script>
+    <!-- Si tienes un archivo showAlert.js, inclúyelo aquí -->
     <script>
         let policies = [];
         let editingPolicyId = null;
@@ -167,7 +169,7 @@
         async function loadPolicies() {
             try {
                 const response = await apiService.getPolicies();
-                
+
                 if (response && response.success) {
                     policies = response.data;
                     renderPoliciesTable(policies);
@@ -223,7 +225,6 @@
                 <tr>
                     <td>${policy.policyNumber}</td>
                     <td>${policy.policyType}</td>
-                    <td>${policy.client.firstName} ${policy.client.lastName}</td>
                     <td>${formatCurrency(policy.premiumAmount)}</td>
                     <td>
                         <span class="badge badge-${getPolicyStatusColor(policy.status)}">
@@ -382,7 +383,6 @@
         }
     </script>
 
-    <script src="/js/auth.js"></script>
-    <script src="/js/api.js"></script>
+    <!-- Scripts movidos arriba para asegurar el orden correcto -->
 </body>
 </html>

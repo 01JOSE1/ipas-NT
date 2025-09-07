@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import com.ipas.ipas.view.dto.ClientSimpleDTO;
 
 @Component
 public class ClientPresenter {
@@ -43,8 +45,18 @@ public class ClientPresenter {
                 clients = clientService.findByUser(user);
             }
             
+            // Mapear a DTO simple para evitar problemas de serialización
+            var clientDTOs = clients.stream().map(client -> new ClientSimpleDTO(
+                client.getId(),
+                client.getFirstName(),
+                client.getLastName(),
+                client.getEmail(),
+                client.getDocumentNumber(),
+                client.getDocumentType() != null ? client.getDocumentType().name() : null,
+                client.getPhoneNumber()
+            )).collect(Collectors.toList());
             response.put("success", true);
-            response.put("data", clients);
+            response.put("data", clientDTOs);
             return ResponseEntity.ok(response);
             
         } catch (Exception e) {
