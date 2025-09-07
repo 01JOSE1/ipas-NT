@@ -73,21 +73,23 @@ async function searchClients(query) {
 
 function renderClientsTable(clientList) {
     const tbody = document.getElementById('clientsTable');
-    
     if (clientList.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="text-center">No se encontraron clientes</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center">No se encontraron clientes</td></tr>';
         return;
     }
-    
-    tbody.innerHTML = clientList.map(client => `
+    tbody.innerHTML = clientList.map(client => {
+        // Debug: log address for each client
+        console.log('Render address:', client.address);
+        return `
         <tr>
             <td>${client.documentNumber}</td>
             <td>${client.firstName} ${client.lastName}</td>
             <td>${client.email || '-'}</td>
             <td>${client.phoneNumber || '-'}</td>
+            <td>${client.address && client.address.trim() !== '' ? client.address : '-'}</td>
             <td>
                 <span class="badge badge-${getStatusColor(client.status)}">
-                    ${getStatusText(client.status)}
+                    ${typeof client.status === 'string' ? getStatusText(client.status) : 'Activo'}
                 </span>
             </td>
             <td>
@@ -101,7 +103,8 @@ function renderClientsTable(clientList) {
                 </div>
             </td>
         </tr>
-    `).join('');
+        `;
+    }).join('');
 }
 
 function getStatusColor(status) {
