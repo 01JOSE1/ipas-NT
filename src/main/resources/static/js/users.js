@@ -78,7 +78,10 @@ function renderUsersTable(userList) {
         return;
     }
     
-    tbody.innerHTML = userList.map(user => `
+    const currentUser = authService.getUser();
+    tbody.innerHTML = userList.map(user => {
+        const canEdit = currentUser && currentUser.role === 'ADMINISTRADOR';
+        return `
         <tr>
             <td>${user.firstName} ${user.lastName}</td>
             <td>${user.email}</td>
@@ -95,16 +98,17 @@ function renderUsersTable(userList) {
             <td>${formatDate(user.lastLogin)}</td>
             <td>
                 <div class="actions">
-                    <button class="action-button" onclick="editUser(${user.id})" title="Editar">
+                    <button class="action-button" onclick="editUser(${user.id})" title="Editar" ${canEdit ? '' : 'disabled'}>
                         ✏️
                     </button>
-                    <button class="action-button" onclick="deleteUser(${user.id})" title="Eliminar">
+                    <button class="action-button" onclick="deleteUser(${user.id})" title="Eliminar" ${canEdit ? '' : 'disabled'}>
                         🗑️
                     </button>
                 </div>
             </td>
         </tr>
-    `).join('');
+        `;
+    }).join('');
 }
 
 function getRoleColor(role) {
@@ -211,20 +215,30 @@ async function handleUserSubmit(e) {
             showAlert(response.message || 'Usuario guardado exitosamente', 'success');
             closeUserModal();
             loadUsers();
+        } else if (response && response.message) {
+            showAlert(response.message, 'error');
         } else {
-            showAlert(response?.message || 'Error al guardar usuario');
+            showAlert('Error al guardar usuario', 'error');
         }
     } catch (error) {
         showLoading(saveBtn, false);
         console.error('Error saving user:', error);
-        showAlert('Error de conexión al guardar usuario');
+        if (error && error.message) {
+            showAlert(error.message, 'error');
+        } else {
+            showAlert('Error de conexión al guardar usuario', 'error');
+        }
     }
 }
 
 async function editUser(userId) {
+    const currentUser = authService.getUser();
+    if (!currentUser || currentUser.role !== 'ADMINISTRADOR') {
+        showAlert('Solo el administrador puede editar usuarios.', 'error');
+        return;
+    }
     try {
         const response = await apiService.getUser(userId);
-        
         if (response && response.success) {
             openUserModal(response.data);
         } else {
