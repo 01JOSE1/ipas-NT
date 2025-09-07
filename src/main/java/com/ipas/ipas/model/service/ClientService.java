@@ -49,7 +49,7 @@ public class ClientService {
     }
     
     public List<Client> searchClients(String searchTerm) {
-        return clientRepository.findBySearchTerm(searchTerm);
+    return clientRepository.findBySearchTerm(searchTerm);
     }
     
     public boolean existsByDocumentNumber(String documentNumber) {

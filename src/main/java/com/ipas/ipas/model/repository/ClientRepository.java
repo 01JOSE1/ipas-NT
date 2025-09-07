@@ -24,7 +24,12 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
     @Query("SELECT c FROM Client c WHERE c.user = ?1 AND c.status = 'ACTIVE'")
     List<Client> findActiveClientsByUser(User user);
     
-    @Query("SELECT c FROM Client c WHERE c.firstName LIKE %?1% OR c.lastName LIKE %?1% OR c.documentNumber LIKE %?1%")
+    @Query("SELECT c FROM Client c WHERE " +
+        "LOWER(CONCAT(c.firstName, ' ', c.lastName)) LIKE LOWER(CONCAT('%', ?1, '%')) OR " +
+        "LOWER(c.firstName) LIKE LOWER(CONCAT('%', ?1, '%')) OR " +
+        "LOWER(c.lastName) LIKE LOWER(CONCAT('%', ?1, '%')) OR " +
+        "c.documentNumber LIKE %?1% OR " +
+        "CAST(c.id AS string) = ?1")
     List<Client> findBySearchTerm(String searchTerm);
     
     @Query("SELECT COUNT(c) FROM Client c WHERE c.user = ?1")
