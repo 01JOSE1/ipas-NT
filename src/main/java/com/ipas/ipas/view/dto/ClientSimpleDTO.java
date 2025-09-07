@@ -8,10 +8,12 @@ public class ClientSimpleDTO {
     private String documentNumber;
     private String documentType;
     private String phoneNumber;
+    private String address;
+    private String occupation;
 
     public ClientSimpleDTO() {}
 
-    public ClientSimpleDTO(Long id, String firstName, String lastName, String email, String documentNumber, String documentType, String phoneNumber) {
+    public ClientSimpleDTO(Long id, String firstName, String lastName, String email, String documentNumber, String documentType, String phoneNumber, String address, String occupation) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -19,6 +21,8 @@ public class ClientSimpleDTO {
         this.documentNumber = documentNumber;
         this.documentType = documentType;
         this.phoneNumber = phoneNumber;
+        this.address = address;
+        this.occupation = occupation;
     }
 
     public Long getId() { return id; }
@@ -35,4 +39,8 @@ public class ClientSimpleDTO {
     public void setDocumentType(String documentType) { this.documentType = documentType; }
     public String getPhoneNumber() { return phoneNumber; }
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
+    public String getOccupation() { return occupation; }
+    public void setOccupation(String occupation) { this.occupation = occupation; }
 }

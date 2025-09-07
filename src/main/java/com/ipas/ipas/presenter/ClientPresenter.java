@@ -53,7 +53,9 @@ public class ClientPresenter {
                 client.getEmail(),
                 client.getDocumentNumber(),
                 client.getDocumentType() != null ? client.getDocumentType().name() : null,
-                client.getPhoneNumber()
+                client.getPhoneNumber(),
+                client.getAddress(),
+                client.getOccupation()
             )).collect(Collectors.toList());
             response.put("success", true);
             response.put("data", clientDTOs);
@@ -75,13 +77,24 @@ public class ClientPresenter {
             if (clientOpt.isPresent()) {
                 Client client = clientOpt.get();
                 Optional<User> currentUser = userService.findByEmail(principal.getName());
-                
+
                 if (currentUser.isPresent()) {
                     User user = currentUser.get();
                     if (user.getRole() == User.UserRole.ADMINISTRADOR || 
                         client.getUser().getId().equals(user.getId())) {
+                        ClientSimpleDTO clientDTO = new ClientSimpleDTO(
+                            client.getId(),
+                            client.getFirstName(),
+                            client.getLastName(),
+                            client.getEmail(),
+                            client.getDocumentNumber(),
+                            client.getDocumentType() != null ? client.getDocumentType().name() : null,
+                            client.getPhoneNumber(),
+                            client.getAddress(),
+                            client.getOccupation()
+                        );
                         response.put("success", true);
-                        response.put("data", client);
+                        response.put("data", clientDTO);
                     } else {
                         response.put("success", false);
                         response.put("message", "Access denied");
@@ -92,7 +105,7 @@ public class ClientPresenter {
                 response.put("success", false);
                 response.put("message", "Client not found");
             }
-            
+
             return ResponseEntity.ok(response);
             
         } catch (Exception e) {
@@ -169,8 +182,19 @@ public class ClientPresenter {
                         client.setOccupation(clientRequest.getOccupation());
                         
                         Client updatedClient = clientService.update(client);
+                        ClientSimpleDTO clientDTO = new ClientSimpleDTO(
+                            updatedClient.getId(),
+                            updatedClient.getFirstName(),
+                            updatedClient.getLastName(),
+                            updatedClient.getEmail(),
+                            updatedClient.getDocumentNumber(),
+                            updatedClient.getDocumentType() != null ? updatedClient.getDocumentType().name() : null,
+                            updatedClient.getPhoneNumber(),
+                            updatedClient.getAddress(),
+                            updatedClient.getOccupation()
+                        );
                         response.put("success", true);
-                        response.put("data", updatedClient);
+                        response.put("data", clientDTO);
                         response.put("message", "Client updated successfully");
                     } else {
                         response.put("success", false);
@@ -194,21 +218,29 @@ public class ClientPresenter {
     
     public ResponseEntity<Map<String, Object>> handleSearchClients(String searchTerm, Principal principal) {
         Map<String, Object> response = new HashMap<>();
-        
         try {
             List<Client> clients = clientService.searchClients(searchTerm);
-            
             Optional<User> currentUser = userService.findByEmail(principal.getName());
             if (currentUser.isPresent() && currentUser.get().getRole() == User.UserRole.ASESOR) {
                 clients = clients.stream()
                     .filter(client -> client.getUser().getId().equals(currentUser.get().getId()))
                     .toList();
             }
-            
+            // Mapear a DTO simple para evitar problemas de serialización
+            var clientDTOs = clients.stream().map(client -> new ClientSimpleDTO(
+                client.getId(),
+                client.getFirstName(),
+                client.getLastName(),
+                client.getEmail(),
+                client.getDocumentNumber(),
+                client.getDocumentType() != null ? client.getDocumentType().name() : null,
+                client.getPhoneNumber(),
+                client.getAddress(),
+                client.getOccupation()
+            )).collect(java.util.stream.Collectors.toList());
             response.put("success", true);
-            response.put("data", clients);
+            response.put("data", clientDTOs);
             return ResponseEntity.ok(response);
-            
         } catch (Exception e) {
             response.put("success", false);
             response.put("message", "Error searching clients: " + e.getMessage());
