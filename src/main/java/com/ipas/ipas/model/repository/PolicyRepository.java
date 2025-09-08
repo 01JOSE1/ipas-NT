@@ -34,6 +34,10 @@ public interface PolicyRepository extends JpaRepository<Policy, Long> {
     @Query("SELECT COUNT(p) FROM Policy p WHERE p.client = ?1")
     Long countByClient(Client client);
     
-    @Query("SELECT p FROM Policy p WHERE p.policyNumber LIKE %?1% OR p.policyType LIKE %?1%")
+    @Query("SELECT p FROM Policy p WHERE " +
+        "LOWER(p.policyNumber) LIKE LOWER(CONCAT('%', ?1, '%')) OR " +
+        "LOWER(p.policyType) LIKE LOWER(CONCAT('%', ?1, '%')) OR " +
+        "LOWER(p.client.firstName) LIKE LOWER(CONCAT('%', ?1, '%')) OR " +
+        "LOWER(p.client.lastName) LIKE LOWER(CONCAT('%', ?1, '%'))")
     List<Policy> findBySearchTerm(String searchTerm);
 }

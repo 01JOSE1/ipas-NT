@@ -13,6 +13,9 @@ import java.util.UUID;
 
 @Service
 public class PolicyService {
+    public List<Policy> findByClients(List<Client> clients) {
+        return policyRepository.findByClients(clients);
+    }
     
     @Autowired
     private PolicyRepository policyRepository;

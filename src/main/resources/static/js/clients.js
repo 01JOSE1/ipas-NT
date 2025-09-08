@@ -1,29 +1,26 @@
 // Check authentication
-if (authService.redirectIfNotAuthenticated()) {
-    const user = authService.getUser();
-    
-    // Setup user info
-    document.getElementById('userName').textContent = `${user.firstName} ${user.lastName}`;
-    document.getElementById('userAvatar').textContent = user.firstName.charAt(0).toUpperCase();
-    
-    // Show admin-only elements
-    if (user.role === 'ADMINISTRADOR') {
-        document.getElementById('usersNav').style.display = 'block';
+document.addEventListener('DOMContentLoaded', () => {
+    if (authService.redirectIfNotAuthenticated()) {
+        const user = authService.getUser();
+        // Setup user info
+        document.getElementById('userName').textContent = `${user.firstName} ${user.lastName}`;
+        document.getElementById('userAvatar').textContent = user.firstName.charAt(0).toUpperCase();
+        // Show admin-only elements
+        if (user.role === 'ADMINISTRADOR') {
+            document.getElementById('usersNav').style.display = 'block';
+        }
+        // Mobile menu toggle
+        document.getElementById('menuToggle').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('open');
+        });
+        // Global variables
+        let clients = [];
+        let editingClientId = null;
+        // Initialize
+        loadClients();
+        setupEventListeners();
     }
-    
-    // Mobile menu toggle
-    document.getElementById('menuToggle').addEventListener('click', () => {
-        document.getElementById('sidebar').classList.toggle('open');
-    });
-    
-    // Global variables
-    let clients = [];
-    let editingClientId = null;
-
-    // Initialize
-    loadClients();
-    setupEventListeners();
-}
+});
 
 function setupEventListeners() {
     // Search functionality

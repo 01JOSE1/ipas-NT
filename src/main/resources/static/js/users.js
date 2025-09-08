@@ -72,12 +72,10 @@ async function searchUsers(query) {
 
 function renderUsersTable(userList) {
     const tbody = document.getElementById('usersTable');
-    
     if (userList.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" class="text-center">No se encontraron usuarios</td></tr>';
         return;
     }
-    
     const currentUser = authService.getUser();
     tbody.innerHTML = userList.map(user => {
         const canEdit = currentUser && currentUser.role === 'ADMINISTRADOR';
@@ -110,6 +108,7 @@ function renderUsersTable(userList) {
         `;
     }).join('');
 }
+
 
 function getRoleColor(role) {
     switch (role) {
@@ -231,6 +230,8 @@ async function handleUserSubmit(e) {
     }
 }
 
+
+// Editar usuario y mostrar pólizas asociadas a sus clientes
 async function editUser(userId) {
     const currentUser = authService.getUser();
     if (!currentUser || currentUser.role !== 'ADMINISTRADOR') {
@@ -241,6 +242,15 @@ async function editUser(userId) {
         const response = await apiService.getUser(userId);
         if (response && response.success) {
             openUserModal(response.data);
+            // Obtener pólizas asociadas a los clientes de este usuario
+            const policiesResponse = await apiService.getPoliciesByUser(userId);
+            if (policiesResponse && policiesResponse.success) {
+                // Aquí puedes mostrar las pólizas en el UI, por ejemplo en un modal o sección aparte
+                // Por ahora, solo las mostramos en consola
+                console.log('Pólizas asociadas a los clientes del usuario:', policiesResponse.data);
+                // Si tienes un elemento en el HTML para mostrar las pólizas, puedes renderizarlas aquí
+                // renderPoliciesForUser(policiesResponse.data);
+            }
         } else {
             showAlert('Error al cargar usuario');
         }

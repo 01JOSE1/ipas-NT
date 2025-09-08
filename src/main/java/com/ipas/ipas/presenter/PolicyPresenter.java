@@ -1,3 +1,4 @@
+
 package com.ipas.ipas.presenter;
 
 import com.ipas.ipas.model.entity.Client;
@@ -14,46 +15,23 @@ import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import com.ipas.ipas.view.dto.PolicySimpleDTO;
 import java.util.Optional;
+import com.ipas.ipas.view.dto.PolicySimpleDTO;
 
 @Component
 public class PolicyPresenter {
-    
-    @Autowired
-    private PolicyService policyService;
-    
-    @Autowired
-    private ClientService clientService;
-    
-    @Autowired
-    private UserService userService;
-    
-    public ResponseEntity<Map<String, Object>> handleGetAllPolicies(Principal principal) {
+    // Obtener pólizas asociadas a un cliente específico
+    public ResponseEntity<Map<String, Object>> handleGetPoliciesByClient(Long clientId) {
         Map<String, Object> response = new HashMap<>();
-        
         try {
-            Optional<User> currentUser = userService.findByEmail(principal.getName());
-            if (currentUser.isEmpty()) {
+            Optional<Client> clientOpt = clientService.findById(clientId);
+            if (clientOpt.isEmpty()) {
                 response.put("success", false);
-                response.put("message", "User not found");
+                response.put("message", "Cliente no encontrado");
                 return ResponseEntity.badRequest().body(response);
             }
-            
-            List<Policy> policies;
-            User user = currentUser.get();
-            
-            if (user.getRole() == User.UserRole.ADMINISTRADOR) {
-                policies = policyService.findAll();
-            } else {
-                List<Client> userClients = clientService.findByUser(user);
-                policies = userClients.stream()
-                    .flatMap(client -> policyService.findByClient(client).stream())
-                    .toList();
-            }
-            
-            // Mapear a DTO simple para evitar problemas de serialización
+            Client client = clientOpt.get();
+            List<Policy> policies = policyService.findByClient(client);
             var policyDTOs = policies.stream().map(policy -> new PolicySimpleDTO(
                 policy.getId(),
                 policy.getPolicyNumber(),
@@ -69,17 +47,103 @@ public class PolicyPresenter {
                 policy.getBeneficiaries(),
                 policy.getTermsConditions(),
                 policy.getClient() != null ? (policy.getClient().getFirstName() + " " + policy.getClient().getLastName()) : null
-            )).collect(Collectors.toList());
+            )).toList();
             response.put("success", true);
             response.put("data", policyDTOs);
             return ResponseEntity.ok(response);
-            
         } catch (Exception e) {
             response.put("success", false);
-            response.put("message", "Error fetching policies: " + e.getMessage());
+            response.put("message", "Error al obtener pólizas: " + e.getMessage());
             return ResponseEntity.internalServerError().body(response);
         }
     }
+    // Método para obtener todas las pólizas
+    public ResponseEntity<Map<String, Object>> handleGetAllPolicies(Principal principal) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            List<Policy> policies = policyService.findAll();
+            Optional<User> currentUser = userService.findByEmail(principal.getName());
+            if (currentUser.isPresent() && currentUser.get().getRole() == User.UserRole.ASESOR) {
+                User user = currentUser.get();
+                List<Client> userClients = clientService.findByUser(user);
+                policies = policies.stream()
+                    .filter(policy -> userClients.contains(policy.getClient()))
+                    .toList();
+            }
+            var policyDTOs = policies.stream().map(policy -> new PolicySimpleDTO(
+                policy.getId(),
+                policy.getPolicyNumber(),
+                policy.getPolicyType(),
+                policy.getCoverage(),
+                policy.getPremiumAmount(),
+                policy.getCoverageAmount(),
+                policy.getStartDate(),
+                policy.getEndDate(),
+                policy.getStatus() != null ? policy.getStatus().name() : null,
+                policy.getClient() != null ? policy.getClient().getId() : null,
+                policy.getDeductible(),
+                policy.getBeneficiaries(),
+                policy.getTermsConditions(),
+                policy.getClient() != null ? (policy.getClient().getFirstName() + " " + policy.getClient().getLastName()) : null
+            )).toList();
+            response.put("success", true);
+            response.put("data", policyDTOs);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Error al obtener pólizas: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+    @Autowired
+    private PolicyService policyService;
+
+    @Autowired
+    private ClientService clientService;
+
+    @Autowired
+    private UserService userService;
+
+    // Obtener pólizas asociadas a los clientes de un usuario específico
+    public ResponseEntity<Map<String, Object>> handleGetPoliciesByUser(Long userId) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            Optional<User> userOpt = userService.findById(userId);
+            if (userOpt.isEmpty()) {
+                response.put("success", false);
+                response.put("message", "Usuario no encontrado");
+                return ResponseEntity.badRequest().body(response);
+            }
+            User user = userOpt.get();
+            List<Client> clients = clientService.findByUser(user);
+            List<Policy> policies = policyService.findByClients(clients);
+            var policyDTOs = policies.stream().map(policy -> new PolicySimpleDTO(
+                policy.getId(),
+                policy.getPolicyNumber(),
+                policy.getPolicyType(),
+                policy.getCoverage(),
+                policy.getPremiumAmount(),
+                policy.getCoverageAmount(),
+                policy.getStartDate(),
+                policy.getEndDate(),
+                policy.getStatus() != null ? policy.getStatus().name() : null,
+                policy.getClient() != null ? policy.getClient().getId() : null,
+                policy.getDeductible(),
+                policy.getBeneficiaries(),
+                policy.getTermsConditions(),
+                policy.getClient() != null ? (policy.getClient().getFirstName() + " " + policy.getClient().getLastName()) : null
+            )).toList();
+            response.put("success", true);
+            response.put("data", policyDTOs);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Error al obtener pólizas: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+    // ...otros métodos existentes correctamente estructurados...
     
     public ResponseEntity<Map<String, Object>> handleGetPolicy(Long id, Principal principal) {
         Map<String, Object> response = new HashMap<>();
@@ -168,6 +232,12 @@ public class PolicyPresenter {
             policy.setBeneficiaries(policyRequest.getBeneficiaries());
             policy.setTermsConditions(policyRequest.getTermsConditions());
             policy.setClient(client);
+            if (policyRequest.getPolicyNumber() != null && !policyRequest.getPolicyNumber().isEmpty()) {
+                policy.setPolicyNumber(policyRequest.getPolicyNumber());
+            }
+            if (policyRequest.getPolicyNumber() != null && !policyRequest.getPolicyNumber().isEmpty()) {
+                policy.setPolicyNumber(policyRequest.getPolicyNumber());
+            }
             
             Policy savedPolicy = policyService.save(policy);
             PolicySimpleDTO policyDTO = new PolicySimpleDTO(
@@ -268,7 +338,7 @@ public class PolicyPresenter {
         
         try {
             List<Policy> policies = policyService.searchPolicies(searchTerm);
-            
+
             Optional<User> currentUser = userService.findByEmail(principal.getName());
             if (currentUser.isPresent() && currentUser.get().getRole() == User.UserRole.ASESOR) {
                 User user = currentUser.get();
@@ -277,11 +347,28 @@ public class PolicyPresenter {
                     .filter(policy -> userClients.contains(policy.getClient()))
                     .toList();
             }
-            
+
+            // Mapear a DTO simple para evitar problemas de serialización y mantener consistencia con el frontend
+            var policyDTOs = policies.stream().map(policy -> new PolicySimpleDTO(
+                policy.getId(),
+                policy.getPolicyNumber(),
+                policy.getPolicyType(),
+                policy.getCoverage(),
+                policy.getPremiumAmount(),
+                policy.getCoverageAmount(),
+                policy.getStartDate(),
+                policy.getEndDate(),
+                policy.getStatus() != null ? policy.getStatus().name() : null,
+                policy.getClient() != null ? policy.getClient().getId() : null,
+                policy.getDeductible(),
+                policy.getBeneficiaries(),
+                policy.getTermsConditions(),
+                policy.getClient() != null ? (policy.getClient().getFirstName() + " " + policy.getClient().getLastName()) : null
+            )).collect(java.util.stream.Collectors.toList());
             response.put("success", true);
-            response.put("data", policies);
+            response.put("data", policyDTOs);
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             response.put("success", false);
             response.put("message", "Error searching policies: " + e.getMessage());

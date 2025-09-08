@@ -1,3 +1,4 @@
+
 package com.ipas.ipas.view.controller;
 
 import com.ipas.ipas.presenter.PolicyPresenter;
@@ -13,6 +14,11 @@ import java.util.Map;
 @RequestMapping("/api/policies")
 @CrossOrigin(origins = "*")
 public class PolicyController {
+    // Endpoint para obtener pólizas asociadas a un cliente específico
+    @GetMapping("/by-client/{clientId}")
+    public ResponseEntity<Map<String, Object>> getPoliciesByClient(@PathVariable Long clientId) {
+        return policyPresenter.handleGetPoliciesByClient(clientId);
+    }
     
     @Autowired
     private PolicyPresenter policyPresenter;
@@ -47,5 +53,10 @@ public class PolicyController {
             @RequestParam String q,
             Principal principal) {
         return policyPresenter.handleSearchPolicies(q, principal);
+    }
+    // Endpoint para obtener pólizas asociadas a los clientes de un usuario específico
+    @GetMapping("/by-user/{userId}")
+    public ResponseEntity<Map<String, Object>> getPoliciesByUser(@PathVariable Long userId) {
+        return policyPresenter.handleGetPoliciesByUser(userId);
     }
 }

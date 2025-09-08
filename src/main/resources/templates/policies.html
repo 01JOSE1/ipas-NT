@@ -99,6 +99,10 @@
                 <button class="modal-close" onclick="closePolicyModal()">&times;</button>
             </div>
             <form id="policyForm">
+                    <div class="form-group">
+                        <label for="policyNumber" class="form-label">Número de Póliza</label>
+                        <input type="text" id="policyNumber" name="policyNumber" class="form-input" maxlength="30" placeholder="Ingrese el número de póliza">
+                    </div>
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="clientSelect" class="form-label">Cliente</label>
@@ -324,6 +328,7 @@
             const formData = new FormData(e.target);
             const policyData = {
                 clientId: parseInt(formData.get('clientId')),
+                policyNumber: formData.get('policyNumber') || null,
                 policyType: formData.get('policyType'),
                 premiumAmount: parseFloat(formData.get('premiumAmount')),
                 coverageAmount: parseFloat(formData.get('coverageAmount')),

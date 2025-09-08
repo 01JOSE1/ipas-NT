@@ -1,4 +1,14 @@
 class ApiService {
+    // Obtener pólizas asociadas a un cliente específico
+    async getPoliciesByClient(clientId) {
+        console.log('📋 Fetching policies for client:', clientId);
+        return this.request(`/policies/by-client/${clientId}`);
+    }
+    // Obtener pólizas asociadas a los clientes de un usuario específico
+    async getPoliciesByUser(userId) {
+        console.log('📋 Fetching policies for user:', userId);
+        return this.request(`/policies/by-user/${userId}`);
+    }
     constructor() {
         this.baseURL = '/api';
         console.log('🔧 ApiService initialized with baseURL:', this.baseURL);

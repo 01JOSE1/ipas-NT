@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public class PolicyRequest {
+    private String policyNumber;
     
     @NotBlank(message = "Policy type is required")
     private String policyType;
@@ -39,6 +40,8 @@ public class PolicyRequest {
     public PolicyRequest() {}
     
     // Getters and Setters
+    public String getPolicyNumber() { return policyNumber; }
+    public void setPolicyNumber(String policyNumber) { this.policyNumber = policyNumber; }
     public String getPolicyType() { return policyType; }
     public void setPolicyType(String policyType) { this.policyType = policyType; }
     
