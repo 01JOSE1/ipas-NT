@@ -8,6 +8,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <script src="/js/auth.js"></script>
+    <script>
+        if (!authService.redirectIfNotAuthenticated()) {
+            // User is not authenticated, redirectIfNotAuthenticated will handle the redirect.
+        } else {
+            const user = authService.getUser();
+            if (user && user.role === 'REGISTRADO') {
+                window.location.href = '/waiting-for-authorization';
+            }
+        }
+    </script>
     <div class="dashboard-container">
         <nav class="sidebar" id="sidebar">
             <div class="sidebar-header">

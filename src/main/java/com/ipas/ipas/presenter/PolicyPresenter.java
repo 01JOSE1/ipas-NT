@@ -43,8 +43,8 @@ public class PolicyPresenter {
             
             List<Policy> policies;
             User user = currentUser.get();
-            
-            if (user.getRole() == User.UserRole.ADMINISTRADOR) {
+            // Ahora tanto ADMINISTRADOR como ASESOR ven todas las pólizas
+            if (user.getRole() == User.UserRole.ADMINISTRADOR || user.getRole() == User.UserRole.ASESOR) {
                 policies = policyService.findAll();
             } else {
                 List<Client> userClients = clientService.findByUser(user);
@@ -93,7 +93,8 @@ public class PolicyPresenter {
                 
                 if (currentUser.isPresent()) {
                     User user = currentUser.get();
-                    if (user.getRole() == User.UserRole.ADMINISTRADOR || 
+                    if (user.getRole() == User.UserRole.ADMINISTRADOR ||
+                        user.getRole() == User.UserRole.ASESOR ||
                         policy.getClient().getUser().getId().equals(user.getId())) {
                         PolicySimpleDTO policyDTO = new PolicySimpleDTO(
                             policy.getId(),
@@ -145,17 +146,6 @@ public class PolicyPresenter {
             }
             
             Client client = clientOpt.get();
-            Optional<User> currentUser = userService.findByEmail(principal.getName());
-            
-            if (currentUser.isPresent()) {
-                User user = currentUser.get();
-                if (user.getRole() == User.UserRole.ASESOR && 
-                    !client.getUser().getId().equals(user.getId())) {
-                    response.put("success", false);
-                    response.put("message", "Access denied");
-                    return ResponseEntity.status(403).body(response);
-                }
-            }
             
             Policy policy = new Policy();
             policy.setPolicyType(policyRequest.getPolicyType());
@@ -210,7 +200,8 @@ public class PolicyPresenter {
                 
                 if (currentUser.isPresent()) {
                     User user = currentUser.get();
-                    if (user.getRole() == User.UserRole.ADMINISTRADOR || 
+                    if (user.getRole() == User.UserRole.ADMINISTRADOR ||
+                        user.getRole() == User.UserRole.ASESOR ||
                         policy.getClient().getUser().getId().equals(user.getId())) {
                         
                         policy.setPolicyType(policyRequest.getPolicyType());
@@ -269,17 +260,25 @@ public class PolicyPresenter {
         try {
             List<Policy> policies = policyService.searchPolicies(searchTerm);
             
-            Optional<User> currentUser = userService.findByEmail(principal.getName());
-            if (currentUser.isPresent() && currentUser.get().getRole() == User.UserRole.ASESOR) {
-                User user = currentUser.get();
-                List<Client> userClients = clientService.findByUser(user);
-                policies = policies.stream()
-                    .filter(policy -> userClients.contains(policy.getClient()))
-                    .toList();
-            }
-            
+            var policyDTOs = policies.stream().map(policy -> new PolicySimpleDTO(
+                policy.getId(),
+                policy.getPolicyNumber(),
+                policy.getPolicyType(),
+                policy.getCoverage(),
+                policy.getPremiumAmount(),
+                policy.getCoverageAmount(),
+                policy.getStartDate(),
+                policy.getEndDate(),
+                policy.getStatus() != null ? policy.getStatus().name() : null,
+                policy.getClient() != null ? policy.getClient().getId() : null,
+                policy.getDeductible(),
+                policy.getBeneficiaries(),
+                policy.getTermsConditions(),
+                policy.getClient() != null ? (policy.getClient().getFirstName() + " " + policy.getClient().getLastName()) : null
+            )).collect(Collectors.toList());
+
             response.put("success", true);
-            response.put("data", policies);
+            response.put("data", policyDTOs);
             return ResponseEntity.ok(response);
             
         } catch (Exception e) {

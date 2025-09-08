@@ -1,7 +1,7 @@
 class ApiService {
     constructor() {
         this.baseURL = '/api';
-        console.log('🔧 ApiService initialized with baseURL:', this.baseURL);
+        // console.log('🔧 ApiService initialized with baseURL:', this.baseURL);
     }
 
     async request(endpoint, options = {}) {
@@ -14,8 +14,8 @@ class ApiService {
             }
         };
 
-        console.log(`📡 Making ${config.method || 'GET'} request to:`, url);
-        console.log('🔑 Request headers:', config.headers);
+        // console.log(`📡 Making ${config.method || 'GET'} request to:`, url);
+        // console.log('🔑 Request headers:', config.headers);
         
         if (config.body) {
             console.log('📦 Request body:', config.body);
@@ -23,7 +23,7 @@ class ApiService {
 
         try {
             const response = await fetch(url, config);
-            console.log(`📨 Response status: ${response.status} ${response.statusText}`);
+            // console.log(`📨 Response status: ${response.status} ${response.statusText}`);
             
             // Check if response is ok
             if (!response.ok) {
@@ -56,7 +56,7 @@ class ApiService {
             
             if (contentType && contentType.includes('application/json')) {
                 data = await response.json();
-                console.log('📨 Response data:', data);
+                // console.log('📨 Response data:', data);
             } else {
                 console.log('⚠️ Non-JSON response, getting text');
                 data = await response.text();
@@ -158,7 +158,7 @@ class ApiService {
 
     // User endpoints (admin only)
     async getUsers() {
-        console.log('👥 Fetching users...');
+        // console.log('👥 Fetching users...');
         return this.request('/users');
     }
 
@@ -176,7 +176,7 @@ class ApiService {
     }
 
     async updateUser(id, userData) {
-        console.log('✏️ Updating user:', id, userData);
+        console.log('✏️ [api.js] Enviando actualización de usuario:', id, userData);
         return this.request(`/users/${id}`, {
             method: 'PUT',
             body: JSON.stringify(userData)
@@ -280,4 +280,4 @@ window.apiDebug = {
     }
 };
 
-console.log('🚀 API service loaded. Use apiDebug in console for debugging.');
+// console.log('🚀 API service loaded. Use apiDebug in console for debugging.');

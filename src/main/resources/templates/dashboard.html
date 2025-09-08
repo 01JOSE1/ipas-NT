@@ -75,6 +75,20 @@
                     </a>
                 </div>
             </nav>
+            <script src="/js/auth.js"></script>
+            <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                try {
+                    const user = window.authService ? authService.getUser() : JSON.parse(localStorage.getItem('user'));
+                    if (user && user.role === 'ADMINISTRADOR') {
+                        const clientsTab = document.querySelector('a[href="/clients"]');
+                        const policiesTab = document.querySelector('a[href="/policies"]');
+                        if (clientsTab) clientsTab.style.display = 'none';
+                        if (policiesTab) policiesTab.style.display = 'none';
+                    }
+                } catch (e) { console.log('Error ocultando pestañas para admin:', e); }
+            });
+            </script>
 
             <main class="main-content">
                 <div class="header">
@@ -164,6 +178,11 @@
                 if (!user) {
                     console.log('❌ No user data found');
                     showErrorAndRedirect('Datos de usuario no encontrados');
+                    return;
+                }
+
+                if (user.role === 'REGISTRADO') {
+                    window.location.href = '/waiting-for-authorization';
                     return;
                 }
 

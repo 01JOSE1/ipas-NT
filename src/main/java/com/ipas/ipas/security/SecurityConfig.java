@@ -46,7 +46,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 
                 // Páginas protegidas - permitir acceso pero la verificación se hace en cliente
-                .requestMatchers("/dashboard", "/clients", "/policies", "/users", "/profile").permitAll()
+                .requestMatchers("/dashboard", "/clients", "/policies", "/users", "/profile", "/waiting-for-authorization").permitAll()
                 
                 // APIs protegidas requieren autenticación JWT
                 .requestMatchers("/api/**").authenticated()

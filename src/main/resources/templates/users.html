@@ -1,3 +1,36 @@
+    <!-- Modal para editar usuario -->
+    <div id="editUserModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Editar Usuario</h3>
+                <button class="modal-close" onclick="closeEditUserModal()">&times;</button>
+            </div>
+            <form id="editUserForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="editRole" class="form-label">Rol</label>
+                        <select id="editRole" name="role" class="form-select" required>
+                            <option value="REGISTRADO">Registrado</option>
+                            <option value="ASESOR">Asesor</option>
+                            <option value="ADMINISTRADOR">Administrador</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editStatus" class="form-label">Estado</label>
+                        <select id="editStatus" name="status" class="form-select" required>
+                            <option value="ACTIVE">Activo</option>
+                            <option value="INACTIVE">Inactivo</option>
+                            <option value="SUSPENDED">Suspendido</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditUserModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -8,6 +41,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <script src="/js/auth.js"></script>
+    <script>
+        if (!authService.redirectIfNotAuthenticated()) {
+            // User is not authenticated, redirectIfNotAuthenticated will handle the redirect.
+        } else {
+            const user = authService.getUser();
+            if (user && user.role === 'REGISTRADO') {
+                window.location.href = '/waiting-for-authorization';
+            }
+        }
+    </script>
     <div class="dashboard-container">
         <nav class="sidebar" id="sidebar">
             <div class="sidebar-header">
@@ -48,7 +92,7 @@
                     <input type="text" id="searchInput" class="search-input" placeholder="Buscar usuarios...">
                     <span class="search-icon">🔍</span>
                 </div>
-                <button class="btn btn-primary" onclick="openUserModal()">+ Nuevo Usuario</button>
+                <!-- Botón de nuevo usuario eliminado -->
             </div>
 
             <div class="card">
@@ -80,51 +124,7 @@
         </main>
     </div>
 
-    <!-- User Modal -->
-    <div id="userModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title" id="modalTitle">Nuevo Usuario</h3>
-                <button class="modal-close" onclick="closeUserModal()">&times;</button>
-            </div>
-            <form id="userForm">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="firstName" class="form-label">Nombres</label>
-                        <input type="text" id="firstName" name="firstName" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="lastName" class="form-label">Apellidos</label>
-                        <input type="text" id="lastName" name="lastName" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="email" id="email" name="email" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="phoneNumber" class="form-label">Teléfono</label>
-                        <input type="tel" id="phoneNumber" name="phoneNumber" class="form-input">
-                    </div>
-                    <div class="form-group" id="passwordGroup">
-                        <label for="password" class="form-label">Contraseña</label>
-                        <input type="password" id="password" name="password" class="form-input" minlength="8" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="role" class="form-label">Rol</label>
-                        <select id="role" name="role" class="form-select" required>
-                            <option value="">Seleccionar rol...</option>
-                            <option value="ASESOR">Asesor</option>
-                            <option value="ADMINISTRADOR">Administrador</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="closeUserModal()">Cancelar</button>
-                    <button type="submit" class="btn btn-primary" id="saveUserBtn">Guardar</button>
-                </div>
-            </form>
-        </div>
-    </div>
+    <!-- Modal de nuevo usuario eliminado -->
 
     <script src="/js/auth.js"></script>
     <script src="/js/api.js"></script>

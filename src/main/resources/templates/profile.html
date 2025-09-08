@@ -8,6 +8,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <script src="/js/auth.js"></script>
+    <script>
+        if (!authService.redirectIfNotAuthenticated()) {
+            // User is not authenticated, redirectIfNotAuthenticated will handle the redirect.
+        } else {
+            const user = authService.getUser();
+            if (user && user.role === 'REGISTRADO') {
+                window.location.href = '/waiting-for-authorization';
+            }
+        }
+    </script>
     <div class="dashboard-container">
         <nav class="sidebar" id="sidebar">
             <div class="sidebar-header">
@@ -123,6 +134,20 @@
 
     <script src="/js/auth.js"></script>
     <script src="/js/api.js"></script>
+        <script>
+        // Ocultar pestañas de clientes y pólizas si es ADMINISTRADOR
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                const user = window.authService ? authService.getUser() : JSON.parse(localStorage.getItem('user'));
+                if (user && user.role === 'ADMINISTRADOR') {
+                    const clientsTab = document.querySelector('a[href="/clients"]');
+                    const policiesTab = document.querySelector('a[href="/policies"]');
+                    if (clientsTab) clientsTab.style.display = 'none';
+                    if (policiesTab) policiesTab.style.display = 'none';
+                }
+            } catch (e) { console.log('Error ocultando pestañas para admin:', e); }
+        });
+        </script>
     <script>
         // Check authentication
         if (authService.redirectIfNotAuthenticated()) {

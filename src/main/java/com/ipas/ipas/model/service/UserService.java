@@ -24,6 +24,13 @@ public class UserService {
     @Autowired
     private EmailService emailService;
     
+    public enum AuthStatus {
+        SUCCESS,
+        INVALID_CREDENTIALS,
+        INACTIVE_USER,
+        USER_NOT_FOUND
+    }
+    
     public List<User> findAll() {
         return userRepository.findAll();
     }
@@ -48,18 +55,20 @@ public class UserService {
         return userRepository.save(user);
     }
     
-    public boolean authenticate(String email, String password) {
-    Optional<User> userOpt = userRepository.findByEmail(email);
-    if (userOpt.isPresent()) {
-        User user = userOpt.get();
-        boolean match = passwordEncoder.matches(password, user.getPassword());
-        System.out.println("Password ingresada: " + password);
-        System.out.println("Password DB: " + user.getPassword());
-        System.out.println("Match: " + match);
-        return match && user.getStatus() == User.UserStatus.ACTIVE;
+    public AuthStatus authenticate(String email, String password) {
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            if (!passwordEncoder.matches(password, user.getPassword())) {
+                return AuthStatus.INVALID_CREDENTIALS;
+            }
+            if (user.getStatus() != User.UserStatus.ACTIVE) {
+                return AuthStatus.INACTIVE_USER;
+            }
+            return AuthStatus.SUCCESS;
+        }
+        return AuthStatus.USER_NOT_FOUND;
     }
-    return false;
-}
 
     
     public void updateLastLogin(Long userId) {

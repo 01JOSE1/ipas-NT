@@ -52,4 +52,9 @@ public class WebController {
     public String resetPassword(@RequestParam String token) {
         return "reset-password";
     }
+
+    @GetMapping("/waiting-for-authorization")
+    public String waitingForAuthorization() {
+        return "waiting-for-authorization";
+    }
 }
