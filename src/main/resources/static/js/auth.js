@@ -1,12 +1,26 @@
 class AuthService {
+    async register(user) {
+        try {
+            const response = await fetch(`${this.baseURL}/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(user)
+            });
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('❌ Register error:', error);
+            return { success: false, message: 'Error de conexión' };
+        }
+    }
     constructor() {
         this.baseURL = '/api/auth';
         this.token = localStorage.getItem('authToken');
         this.user = JSON.parse(localStorage.getItem('user') || 'null');
         
-        console.log('🔧 AuthService initialized');
-        console.log('🔑 Token from storage:', this.token ? 'Present' : 'Not found');
-        console.log('👤 User from storage:', this.user);
+        // console.log('🔧 AuthService initialized');
+        // console.log('🔑 Token from storage:', this.token ? 'Present' : 'Not found');
+        // console.log('👤 User from storage:', this.user);
     }
 
     async login(email, password, twoFactorCode = null) {
@@ -49,9 +63,9 @@ class AuthService {
                     console.error('❌ No se guardó token o usuario en localStorage');
                     return { success: false, message: 'No se pudo guardar la sesión' };
                 }
-                console.log('✅ Login successful, token saved');
-                console.log('🔑 Token:', this.token.substring(0, 20) + '...');
-                console.log('👤 User:', this.user);
+                // console.log('✅ Login successful, token saved');
+                // console.log('🔑 Token:', this.token.substring(0, 20) + '...');
+                // console.log('👤 User:', this.user);
                 showAlert('Sesión iniciada correctamente', 'success');
                 return { success: true };
             }
@@ -113,34 +127,34 @@ class AuthService {
     }
 
     isAuthenticated() {
-        const hasToken = !!this.token;
-        const hasUser = !!this.user;
-        
-        console.log('🔍 Checking authentication:');
-        console.log('  - Has token:', hasToken);
-        console.log('  - Has user:', hasUser);
-        
+        // Siempre leer el token y usuario más reciente de localStorage
+        const token = localStorage.getItem('authToken');
+        const userStr = localStorage.getItem('user');
+        let user = null;
+        try {
+            user = userStr ? JSON.parse(userStr) : null;
+        } catch (e) {
+            console.error('❌ Error parsing user from localStorage:', e);
+            user = null;
+        }
+        const hasToken = !!token;
+        const hasUser = !!user;
         if (!hasToken || !hasUser) {
             console.log('❌ Not authenticated - missing token or user');
             return false;
         }
-
         // Verificar si el token ha expirado
         try {
-            const payload = JSON.parse(atob(this.token.split('.')[1]));
+            const payload = JSON.parse(atob(token.split('.')[1]));
             const currentTime = Date.now() / 1000;
-            
             if (payload.exp < currentTime) {
                 console.log('❌ Token has expired');
                 this.logout();
                 return false;
             }
-            
-            console.log('✅ User is authenticated');
             return true;
         } catch (error) {
             console.log('❌ Invalid token format:', error);
-            // No hacer logout aquí para evitar loops, solo limpiar
             this.token = null;
             this.user = null;
             localStorage.removeItem('authToken');
@@ -153,24 +167,24 @@ class AuthService {
         const headers = {
             'Content-Type': 'application/json'
         };
-        
-        if (this.token) {
-            headers['Authorization'] = `Bearer ${this.token}`;
-            console.log('🔑 Adding Authorization header');
+        // Siempre leer el token actualizado de localStorage
+        const token = localStorage.getItem('authToken');
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+            // console.log('🔑 Adding Authorization header');
         } else {
             console.log('⚠️ No token available for Authorization header');
         }
-        
         return headers;
     }
 
     redirectIfNotAuthenticated() {
         if (!this.isAuthenticated()) {
-            console.log('🚫 Not authenticated, redirecting to login');
+            // console.log('🚫 Not authenticated, redirecting to login');
             window.location.href = '/login';
             return false;
         }
-        console.log('✅ User authenticated, allowing access');
+        // console.log('✅ User authenticated, allowing access');
         return true;
     }
 
@@ -186,12 +200,20 @@ class AuthService {
 
     hasRole(role) {
         const userHasRole = this.user && this.user.role === role;
-        console.log(`🔍 Checking role ${role}:`, userHasRole);
+        // console.log(`🔍 Checking role ${role}:`, userHasRole);
         return userHasRole;
     }
 
     getUser() {
-        return this.user;
+        // Siempre leer el usuario actualizado de localStorage
+        const userStr = localStorage.getItem('user');
+        if (!userStr) return null;
+        try {
+            return JSON.parse(userStr);
+        } catch (e) {
+            console.error('❌ Error parsing user from localStorage:', e);
+            return null;
+        }
     }
 }
 
@@ -310,4 +332,4 @@ window.authDebug = {
     }
 };
 
-console.log('🚀 Auth service loaded. Use authDebug in console for debugging.');
+// console.log('🚀 Auth service loaded. Use authDebug in console for debugging.');

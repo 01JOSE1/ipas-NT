@@ -35,11 +35,10 @@ public class ClientPresenter {
                 response.put("message", "User not found");
                 return ResponseEntity.badRequest().body(response);
             }
-            
             List<Client> clients;
             User user = currentUser.get();
-            
-            if (user.getRole() == User.UserRole.ADMINISTRADOR) {
+            // Ahora tanto ADMINISTRADOR como ASESOR ven todos los clientes
+            if (user.getRole() == User.UserRole.ADMINISTRADOR || user.getRole() == User.UserRole.ASESOR) {
                 clients = clientService.findAll();
             } else {
                 clients = clientService.findByUser(user);
@@ -80,8 +79,7 @@ public class ClientPresenter {
 
                 if (currentUser.isPresent()) {
                     User user = currentUser.get();
-                    if (user.getRole() == User.UserRole.ADMINISTRADOR || 
-                        client.getUser().getId().equals(user.getId())) {
+                    if (user.getRole() == User.UserRole.ADMINISTRADOR || user.getRole() == User.UserRole.ASESOR) {
                         ClientSimpleDTO clientDTO = new ClientSimpleDTO(
                             client.getId(),
                             client.getFirstName(),
@@ -170,9 +168,7 @@ public class ClientPresenter {
                 
                 if (currentUser.isPresent()) {
                     User user = currentUser.get();
-                    if (user.getRole() == User.UserRole.ADMINISTRADOR || 
-                        client.getUser().getId().equals(user.getId())) {
-                        
+                    if (user.getRole() == User.UserRole.ASESOR) {
                         client.setFirstName(clientRequest.getFirstName());
                         client.setLastName(clientRequest.getLastName());
                         client.setEmail(clientRequest.getEmail());
@@ -180,7 +176,6 @@ public class ClientPresenter {
                         client.setBirthDate(clientRequest.getBirthDate());
                         client.setAddress(clientRequest.getAddress());
                         client.setOccupation(clientRequest.getOccupation());
-                        
                         Client updatedClient = clientService.update(client);
                         ClientSimpleDTO clientDTO = new ClientSimpleDTO(
                             updatedClient.getId(),
@@ -220,13 +215,7 @@ public class ClientPresenter {
         Map<String, Object> response = new HashMap<>();
         try {
             List<Client> clients = clientService.searchClients(searchTerm);
-            Optional<User> currentUser = userService.findByEmail(principal.getName());
-            if (currentUser.isPresent() && currentUser.get().getRole() == User.UserRole.ASESOR) {
-                clients = clients.stream()
-                    .filter(client -> client.getUser().getId().equals(currentUser.get().getId()))
-                    .toList();
-            }
-            // Mapear a DTO simple para evitar problemas de serialización
+            // Ahora el ASESOR ve todos los clientes igual que el admin
             var clientDTOs = clients.stream().map(client -> new ClientSimpleDTO(
                 client.getId(),
                 client.getFirstName(),

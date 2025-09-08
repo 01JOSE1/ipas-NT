@@ -30,18 +30,13 @@ public class UserController {
         return userPresenter.handleGetUser(id);
     }
     
-    @PostMapping
-    @PreAuthorize("hasRole('ADMINISTRADOR')")
-    public ResponseEntity<Map<String, Object>> createUser(@Valid @RequestBody UserRequest userRequest) {
-        return userPresenter.handleCreateUser(userRequest);
-    }
     
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<Map<String, Object>> updateUser(
             @PathVariable Long id,
-            @Valid @RequestBody UserRequest userRequest) {
-        return userPresenter.handleUpdateUser(id, userRequest);
+            @RequestBody com.ipas.ipas.view.dto.UserUpdateRequest userUpdateRequest) {
+        return userPresenter.handleUpdateUser(id, userUpdateRequest);
     }
     
     @DeleteMapping("/{id}")

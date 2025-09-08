@@ -22,7 +22,16 @@ public class UserPresenter {
         Map<String, Object> response = new HashMap<>();
         try {
             List<User> users = userService.findAll();
+            // Filtrar el usuario actual si es admin
+            // Obtener el usuario actual del contexto de seguridad
+            final String[] currentEmailHolder = new String[1];
+            currentEmailHolder[0] = null;
+            try {
+                currentEmailHolder[0] = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName();
+            } catch (Exception ex) {}
+            final String currentEmail = currentEmailHolder[0];
             List<UserResponse> userResponses = users.stream()
+                .filter(u -> currentEmail == null || !u.getEmail().equalsIgnoreCase(currentEmail))
                 .map(UserResponse::new)
                 .toList();
             response.put("success", true);
@@ -89,20 +98,19 @@ public class UserPresenter {
         }
     }
     
-    public ResponseEntity<Map<String, Object>> handleUpdateUser(Long id, UserRequest userRequest) {
+    public ResponseEntity<Map<String, Object>> handleUpdateUser(Long id, com.ipas.ipas.view.dto.UserUpdateRequest userRequest) {
         Map<String, Object> response = new HashMap<>();
-        
         try {
             System.out.println("[UserPresenter] Update request for user id: " + id);
+            System.out.println("[UserPresenter] Valores recibidos: role=" + userRequest.getRole() + ", status=" + userRequest.getStatus());
             Optional<User> userOpt = userService.findById(id);
             if (userOpt.isPresent()) {
                 User user = userOpt.get();
-                System.out.println("[UserPresenter] Editando usuario: " + user.getId() + " rol actual: " + user.getRole());
-                user.setFirstName(userRequest.getFirstName());
-                user.setLastName(userRequest.getLastName());
-                user.setPhoneNumber(userRequest.getPhoneNumber());
+                System.out.println("[UserPresenter] Editando usuario: " + user.getId() + " rol actual: " + user.getRole() + ", status actual: " + user.getStatus());
+                // Permitir modificar el rol
                 if (userRequest.getRole() != null) {
                     try {
+                        System.out.println("[UserPresenter] Intentando asignar rol: " + userRequest.getRole());
                         user.setRole(User.UserRole.valueOf(userRequest.getRole()));
                     } catch (Exception ex) {
                         System.err.println("[UserPresenter] Error al asignar rol: " + userRequest.getRole());
@@ -111,8 +119,20 @@ public class UserPresenter {
                         return ResponseEntity.badRequest().body(response);
                     }
                 }
+                // Permitir modificar el status
+                if (userRequest.getStatus() != null) {
+                    try {
+                        System.out.println("[UserPresenter] Intentando asignar status: " + userRequest.getStatus());
+                        user.setStatus(User.UserStatus.valueOf(userRequest.getStatus()));
+                    } catch (Exception ex) {
+                        System.err.println("[UserPresenter] Error al asignar status: " + userRequest.getStatus());
+                        response.put("success", false);
+                        response.put("message", "Status inválido: " + userRequest.getStatus());
+                        return ResponseEntity.badRequest().body(response);
+                    }
+                }
                 User updatedUser = userService.update(user);
-                System.out.println("[UserPresenter] Usuario actualizado: " + updatedUser.getId() + " nuevo rol: " + updatedUser.getRole());
+                System.out.println("[UserPresenter] Usuario actualizado: " + updatedUser.getId() + " nuevo rol: " + updatedUser.getRole() + ", nuevo status: " + updatedUser.getStatus());
                 response.put("success", true);
                 response.put("data", new UserResponse(updatedUser));
                 response.put("message", "User updated successfully");

@@ -1,6 +1,7 @@
 package com.ipas.ipas.view.controller;
 
 import com.ipas.ipas.presenter.ClientPresenter;
+import org.springframework.security.access.prepost.PreAuthorize;
 import com.ipas.ipas.view.dto.ClientRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +29,7 @@ public class ClientController {
     }
     
     @PostMapping
+    @PreAuthorize("hasRole('ASESOR')")
     public ResponseEntity<Map<String, Object>> createClient(
             @Valid @RequestBody ClientRequest clientRequest,
             Principal principal) {
@@ -35,6 +37,7 @@ public class ClientController {
     }
     
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ASESOR')")
     public ResponseEntity<Map<String, Object>> updateClient(
             @PathVariable Long id,
             @Valid @RequestBody ClientRequest clientRequest,

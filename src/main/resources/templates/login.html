@@ -59,6 +59,8 @@
             
             <div class="text-center mt-2">
                 <a href="/forgot-password" class="text-link">¿Olvidaste tu contraseña?</a>
+                <br>
+                <a href="#" class="text-link" id="showRegister">¿No tienes cuenta? Regístrate</a>
             </div>
         </div>
     </div>
@@ -72,20 +74,74 @@
             const twoFactorGroup = document.getElementById('twoFactorGroup');
             let requiresTwoFactor = false;
 
+            // Registro
+            let registerForm = null;
+            document.getElementById('showRegister').addEventListener('click', function(e) {
+                e.preventDefault();
+                if (!registerForm) {
+                    registerForm = document.createElement('form');
+                    registerForm.id = 'registerForm';
+                    registerForm.innerHTML = `
+                        <div class="form-group">
+                            <label for="regFirstName" class="form-label">Nombres</label>
+                            <input type="text" id="regFirstName" name="firstName" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="regLastName" class="form-label">Apellidos</label>
+                            <input type="text" id="regLastName" name="lastName" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="regEmail" class="form-label">Correo Electrónico</label>
+                            <input type="email" id="regEmail" name="email" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="regPassword" class="form-label">Contraseña</label>
+                            <input type="password" id="regPassword" name="password" class="form-input" minlength="8" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-full" id="registerBtn">Registrarse</button>
+                        <button type="button" class="btn btn-secondary btn-full" id="cancelRegister">Cancelar</button>
+                    `;
+                    document.querySelector('.auth-card').appendChild(registerForm);
+                    loginForm.style.display = 'none';
+                    registerForm.style.display = 'block';
+                    document.getElementById('cancelRegister').onclick = function() {
+                        registerForm.remove();
+                        loginForm.style.display = 'block';
+                        registerForm = null;
+                    };
+                    registerForm.onsubmit = async function(ev) {
+                        ev.preventDefault();
+                        const formData = new FormData(registerForm);
+                        const user = {
+                            firstName: formData.get('firstName'),
+                            lastName: formData.get('lastName'),
+                            email: formData.get('email'),
+                            password: formData.get('password')
+                        };
+                        showLoading(document.getElementById('registerBtn'), true);
+                        const result = await authService.register(user);
+                        showLoading(document.getElementById('registerBtn'), false);
+                        if (result.success) {
+                            showAlert('Registro exitoso, ahora puedes iniciar sesión', 'success');
+                            registerForm.remove();
+                            loginForm.style.display = 'block';
+                            registerForm = null;
+                        } else {
+                            showAlert(result.message || 'Error al registrarse', 'error');
+                        }
+                    };
+                }
+            });
+
             loginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                
                 const formData = new FormData(loginForm);
                 const email = formData.get('email');
                 const password = formData.get('password');
                 const twoFactorCode = formData.get('twoFactorCode');
-                
                 showLoading(loginBtn, true);
-                
                 const result = await authService.login(email, password, twoFactorCode);
-                
                 showLoading(loginBtn, false);
-                
                 if (result.success) {
                     if (result.requiresTwoFactor) {
                         requiresTwoFactor = true;
@@ -94,8 +150,12 @@
                         document.getElementById('twoFactorCode').focus();
                         return;
                     }
-                    
-                    window.location.href = '/dashboard';
+                    const user = authService.getUser();
+                    if (user && user.role === 'REGISTRADO') {
+                        window.location.href = '/waiting-for-authorization';
+                    } else {
+                        window.location.href = '/dashboard';
+                    }
                 } else {
                     showAlert(result.message || 'Error al iniciar sesión');
                     if (requiresTwoFactor) {

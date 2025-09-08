@@ -1,29 +1,36 @@
-// Check authentication
-if (authService.redirectIfNotAuthenticated()) {
-    const user = authService.getUser();
-    
-    // Setup user info
-    document.getElementById('userName').textContent = `${user.firstName} ${user.lastName}`;
-    document.getElementById('userAvatar').textContent = user.firstName.charAt(0).toUpperCase();
-    
-    // Show admin-only elements
-    if (user.role === 'ADMINISTRADOR') {
-        document.getElementById('usersNav').style.display = 'block';
-    }
-    
-    // Mobile menu toggle
-    document.getElementById('menuToggle').addEventListener('click', () => {
-        document.getElementById('sidebar').classList.toggle('open');
-    });
-    
-    // Global variables
-    let clients = [];
-    let editingClientId = null;
 
-    // Initialize
-    loadClients();
-    setupEventListeners();
-}
+document.addEventListener('DOMContentLoaded', function() {
+    if (authService.redirectIfNotAuthenticated()) {
+        const user = authService.getUser();
+        console.log('[CLIENTS] Rol del usuario:', user.role);
+        document.getElementById('userName').textContent = `${user.firstName} ${user.lastName}`;
+        document.getElementById('userAvatar').textContent = user.firstName.charAt(0).toUpperCase();
+        // Si es REGISTRADO, mostrar solo pantalla de espera
+        if (user.role === 'REGISTRADO') {
+            const mainContent = document.querySelector('.main-content');
+            if (mainContent) {
+                mainContent.innerHTML = '<div class="waiting-confirmation"><h2>Esperando confirmación del administrador...</h2><p>Tu cuenta está pendiente de aprobación. Por favor, espera a que un administrador confirme tu acceso.</p></div>';
+            }
+            return;
+        }
+        if (user.role === 'ADMINISTRADOR') {
+            document.getElementById('usersNav').style.display = 'block';
+            // Oculta la tabla y controles de clientes para ADMINISTRADOR
+            const card = document.querySelector('.card');
+            if (card) card.style.display = 'none';
+            const pageHeader = document.querySelector('.page-header');
+            if (pageHeader) pageHeader.style.display = 'none';
+            return;
+        }
+        document.getElementById('menuToggle').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('open');
+        });
+        let clients = [];
+        let editingClientId = null;
+        loadClients();
+        setupEventListeners();
+    }
+});
 
 function setupEventListeners() {
     // Search functionality
@@ -77,6 +84,7 @@ function renderClientsTable(clientList) {
         tbody.innerHTML = '<tr><td colspan="7" class="text-center">No se encontraron clientes</td></tr>';
         return;
     }
+    const user = authService.getUser();
     tbody.innerHTML = clientList.map(client => {
         // Debug: log address for each client
         console.log('Render address:', client.address);
@@ -94,12 +102,8 @@ function renderClientsTable(clientList) {
             </td>
             <td>
                 <div class="actions">
-                    <button class="action-button" onclick="editClient(${client.id})" title="Editar">
-                        ✏️
-                    </button>
-                    <button class="action-button" onclick="viewClientPolicies(${client.id})" title="Ver Pólizas">
-                        📋
-                    </button>
+                    ${user.role !== 'ADMINISTRADOR' ? `<button class="action-button" onclick="editClient(${client.id})" title="Editar">✏️</button>` : ''}
+                    <button class="action-button" onclick="viewClientPolicies(${client.id})" title="Ver Pólizas">📋</button>
                 </div>
             </td>
         </tr>
@@ -129,7 +133,7 @@ function openClientModal(clientData = null) {
     const modal = document.getElementById('clientModal');
     const form = document.getElementById('clientForm');
     const title = document.getElementById('modalTitle');
-    
+    const user = authService.getUser();
     if (clientData) {
         title.textContent = 'Editar Cliente';
         fillClientForm(clientData);
@@ -139,7 +143,11 @@ function openClientModal(clientData = null) {
         form.reset();
         editingClientId = null;
     }
-    
+    // Ocultar botón guardar si es admin
+    const saveBtn = document.getElementById('saveClientBtn');
+    if (saveBtn) {
+        saveBtn.style.display = (user.role === 'ADMINISTRADOR') ? 'none' : 'inline-block';
+    }
     modal.classList.add('show');
 }
 

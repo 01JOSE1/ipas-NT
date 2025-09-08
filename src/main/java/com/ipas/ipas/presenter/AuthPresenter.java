@@ -1,3 +1,4 @@
+
 package com.ipas.ipas.presenter;
 
 import com.ipas.ipas.model.entity.User;
@@ -29,10 +30,11 @@ public class AuthPresenter {
         System.out.println("Intentando login con email: " + loginRequest.getEmail());
 
         try {
-            boolean isAuthenticated = userService.authenticate(
+            UserService.AuthStatus authStatus = userService.authenticate(
                     loginRequest.getEmail(),
                     loginRequest.getPassword());
-            if (isAuthenticated) {
+
+            if (authStatus == UserService.AuthStatus.SUCCESS) {
                 Optional<User> userOpt = userService.findByEmail(loginRequest.getEmail());
                 if (userOpt.isPresent()) {
                     User user = userOpt.get();
@@ -43,7 +45,7 @@ public class AuthPresenter {
                         response.put("requiresTwoFactor", true);
                         return ResponseEntity.ok(response);
                     }
-                    String token = jwtUtil.generateToken(user.getEmail());
+                    String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
                     System.out.println("Token generado: " + token);
                     userService.updateLastLogin(user.getId());
                     UserSimpleDTO userDto = new UserSimpleDTO(
@@ -62,7 +64,16 @@ public class AuthPresenter {
                     System.out.println("Login response: " + response);
                     return ResponseEntity.ok(response);
                 }
+            } else {
+                response.put("success", false);
+                if (authStatus == UserService.AuthStatus.INACTIVE_USER) {
+                    response.put("message", "Usuario inactivo");
+                } else {
+                    response.put("message", "Credenciales incorrectas");
+                }
+                return ResponseEntity.badRequest().body(response);
             }
+            // This part should be unreachable, but as a fallback:
             response.put("success", false);
             response.put("message", "Invalid credentials");
             return ResponseEntity.badRequest().body(response);
@@ -116,6 +127,32 @@ public class AuthPresenter {
         } catch (Exception e) {
             response.put("success", false);
             response.put("message", "Error updating password: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+        public ResponseEntity<Map<String, Object>> handleRegister(com.ipas.ipas.view.dto.UserRequest userRequest) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            if (userService.existsByEmail(userRequest.getEmail())) {
+                response.put("success", false);
+                response.put("message", "El correo ya está registrado");
+                return ResponseEntity.badRequest().body(response);
+            }
+            User user = new User();
+            user.setEmail(userRequest.getEmail());
+            user.setPassword(userRequest.getPassword());
+            user.setFirstName(userRequest.getFirstName());
+            user.setLastName(userRequest.getLastName());
+            user.setRole(User.UserRole.REGISTRADO);
+            user.setStatus(User.UserStatus.ACTIVE);
+            userService.save(user);
+            response.put("success", true);
+            response.put("message", "Usuario registrado exitosamente");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Error al registrar usuario: " + e.getMessage());
             return ResponseEntity.internalServerError().body(response);
         }
     }

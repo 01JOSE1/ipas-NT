@@ -1,48 +1,7 @@
-// Check authentication and admin role
-if (authService.redirectIfNotAuthenticated()) {
-    const user = authService.getUser();
-    
-    if (!authService.hasRole('ADMINISTRADOR')) {
-        window.location.href = '/dashboard';
-    }
-    
-    // Setup user info
-    document.getElementById('userName').textContent = `${user.firstName} ${user.lastName}`;
-    document.getElementById('userAvatar').textContent = user.firstName.charAt(0).toUpperCase();
-    
-    // Mobile menu toggle
-    document.getElementById('menuToggle').addEventListener('click', () => {
-        document.getElementById('sidebar').classList.toggle('open');
-    });
-    
-    // Global variables
-    let users = [];
-    let editingUserId = null;
-
-    // Initialize
-    loadUsers();
-    setupEventListeners();
-}
-
-function setupEventListeners() {
-    // Search functionality
-    document.getElementById('searchInput').addEventListener('input', (e) => {
-        const query = e.target.value.trim();
-        if (query.length >= 2) {
-            searchUsers(query);
-        } else if (query.length === 0) {
-            loadUsers();
-        }
-    });
-
-    // User form submission
-    document.getElementById('userForm').addEventListener('submit', handleUserSubmit);
-}
-
+// Cargar y mostrar usuarios para el administrador
 async function loadUsers() {
     try {
         const response = await apiService.getUsers();
-        
         if (response && response.success) {
             users = response.data;
             renderUsersTable(users);
@@ -55,29 +14,75 @@ async function loadUsers() {
     }
 }
 
-async function searchUsers(query) {
+console.log('🟢 INICIO users.js');
+
+// ...existing code...
+
+// Registrar el listener al final, cuando todas las funciones ya están declaradas
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🟠 [users.js] DOMContentLoaded fired');
+    // Ocultar pestañas de clientes y pólizas si es ADMINISTRADOR en todas las páginas con menú
     try {
-        const response = await apiService.searchUsers(query);
-        
-        if (response && response.success) {
-            renderUsersTable(response.data);
-        } else {
-            showAlert('Error en la búsqueda');
+        const user = authService.getUser();
+        if (user && user.role === 'ADMINISTRADOR') {
+            const clientsTab = document.querySelector('a[href="/clients"]');
+            const policiesTab = document.querySelector('a[href="/policies"]');
+            if (clientsTab) clientsTab.style.display = 'none';
+            if (policiesTab) policiesTab.style.display = 'none';
         }
-    } catch (error) {
-        console.error('Error searching users:', error);
-        showAlert('Error de conexión en la búsqueda');
+    } catch (e) { console.log('Error ocultando pestañas para admin:', e); }
+
+    // Ocultar pestañas de clientes y pólizas si es ADMINISTRADOR
+    const user = authService.getUser();
+    if (user && user.role === 'ADMINISTRADOR') {
+        const clientsTab = document.querySelector('a[href="/clients"]');
+        const policiesTab = document.querySelector('a[href="/policies"]');
+        if (clientsTab) clientsTab.style.display = 'none';
+        if (policiesTab) policiesTab.style.display = 'none';
     }
-}
+    const editUserForm = document.getElementById('editUserForm');
+    console.log('🟡 [users.js] Buscando editUserForm:', editUserForm);
+    if (editUserForm) {
+        console.log('🟢 [users.js] Se encontró el formulario editUserForm y se agregará el eventListener');
+        editUserForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            console.log('🟡 [users.js] submit editUserForm');
+            if (!window.editingUserData) {
+                console.log('🔴 [users.js] No editingUserData');
+                return;
+            }
+            const newRole = document.getElementById('editRole').value;
+            const newStatus = document.getElementById('editStatus').value;
+            console.log('🟢 [users.js] Valores seleccionados para actualizar:', { role: newRole, status: newStatus });
+            try {
+                const response = await apiService.updateUser(window.editingUserData.id, { role: newRole, status: newStatus });
+                console.log('🟢 [users.js] Respuesta updateUser:', typeof response, response);
+                if ((response && response.success) || (response && response.id)) {
+                    showAlert('Usuario actualizado', 'success');
+                    window.closeEditUserModal();
+                    loadUsers();
+                } else {
+                    showAlert('Error al actualizar usuario', 'error');
+                    console.warn('⚠️ [users.js] Respuesta inesperada updateUser:', response);
+                }
+            } catch (error) {
+                console.error('🔴 [users.js] Error updateUser:', error);
+                showAlert('Error de conexión al actualizar usuario', 'error');
+            }
+        });
+    } else {
+        console.error('🔴 [users.js] No se encontró el formulario editUserForm al cargar DOMContentLoaded');
+    }
+});
+
+// ...existing code...
 
 function renderUsersTable(userList) {
     const tbody = document.getElementById('usersTable');
-    
     if (userList.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" class="text-center">No se encontraron usuarios</td></tr>';
         return;
     }
-    
     const currentUser = authService.getUser();
     tbody.innerHTML = userList.map(user => {
         const canEdit = currentUser && currentUser.role === 'ADMINISTRADOR';
@@ -109,7 +114,90 @@ function renderUsersTable(userList) {
         </tr>
         `;
     }).join('');
+
 }
+// Modal editar usuario
+window.editingUserData = null;
+window.openEditUserModal = function(user) {
+    window.editingUserData = user;
+    document.getElementById('editRole').value = user.role;
+    document.getElementById('editStatus').value = user.status;
+    document.getElementById('editUserModal').classList.add('show');
+}
+
+window.closeEditUserModal = function() {
+    window.editingUserData = null;
+    document.getElementById('editUserModal').classList.remove('show');
+// (fin de archivo)
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🟠 [users.js] DOMContentLoaded fired');
+    const editUserForm = document.getElementById('editUserForm');
+    console.log('🟡 [users.js] Buscando editUserForm:', editUserForm);
+    if (editUserForm) {
+        console.log('🟢 [users.js] Se encontró el formulario editUserForm y se agregará el eventListener');
+        editUserForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            console.log('🟡 [users.js] submit editUserForm');
+            if (!window.editingUserData) {
+                console.log('🔴 [users.js] No editingUserData');
+                return;
+            }
+            const newRole = document.getElementById('editRole').value;
+            const newStatus = document.getElementById('editStatus').value;
+            console.log('🟢 [users.js] Valores seleccionados para actualizar:', { role: newRole, status: newStatus });
+            try {
+                const response = await apiService.updateUser(window.editingUserData.id, { role: newRole, status: newStatus });
+                console.log('🟢 [users.js] Respuesta updateUser:', typeof response, response);
+                if ((response && response.success) || (response && response.id)) {
+                    showAlert('Usuario actualizado', 'success');
+                    window.closeEditUserModal();
+                    loadUsers();
+                } else {
+                    showAlert('Error al actualizar usuario', 'error');
+                    console.warn('⚠️ [users.js] Respuesta inesperada updateUser:', response);
+                }
+            } catch (error) {
+                console.error('🔴 [users.js] Error updateUser:', error);
+                showAlert('Error de conexión al actualizar usuario', 'error');
+            }
+        });
+    } else {
+        console.error('🔴 [users.js] No se encontró el formulario editUserForm al cargar DOMContentLoaded');
+    }
+});
+}
+
+// Cambiar rol del usuario
+async function changeUserRole(userId, newRole) {
+    try {
+        const response = await apiService.updateUser(userId, { role: newRole });
+        if (response && response.success) {
+            showAlert('Rol actualizado', 'success');
+            loadUsers();
+        } else {
+            showAlert('Error al actualizar rol', 'error');
+        }
+    } catch (error) {
+        showAlert('Error de conexión al actualizar rol', 'error');
+    }
+}
+
+// Cambiar estado del usuario
+async function changeUserStatus(userId, newStatus) {
+    try {
+        const response = await apiService.updateUser(userId, { status: newStatus });
+        if (response && response.success) {
+            showAlert('Estado actualizado', 'success');
+            loadUsers();
+        } else {
+            showAlert('Error al actualizar estado', 'error');
+        }
+    } catch (error) {
+        showAlert('Error de conexión al actualizar estado', 'error');
+    }
+}
+
 
 function getRoleColor(role) {
     switch (role) {
@@ -145,90 +233,34 @@ function getStatusText(status) {
     }
 }
 
-function openUserModal(userData = null) {
-    const modal = document.getElementById('userModal');
-    const form = document.getElementById('userForm');
-    const title = document.getElementById('modalTitle');
-    const passwordGroup = document.getElementById('passwordGroup');
+function formatDate(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleString('es-CO');
+}
+// Check authentication and admin role
+if (authService.redirectIfNotAuthenticated()) {
+    const user = authService.getUser();
     
-    if (userData) {
-        title.textContent = 'Editar Usuario';
-        fillUserForm(userData);
-        editingUserId = userData.id;
-        passwordGroup.style.display = 'none';
-        document.getElementById('password').required = false;
-    } else {
-        title.textContent = 'Nuevo Usuario';
-        form.reset();
-        editingUserId = null;
-        passwordGroup.style.display = 'block';
-        document.getElementById('password').required = true;
+    if (!authService.hasRole('ADMINISTRADOR')) {
+        window.location.href = '/dashboard';
     }
     
-    modal.classList.add('show');
-}
+    // Setup user info
+    document.getElementById('userName').textContent = `${user.firstName} ${user.lastName}`;
+    document.getElementById('userAvatar').textContent = user.firstName.charAt(0).toUpperCase();
+    
+    // Mobile menu toggle
+    document.getElementById('menuToggle').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('open');
+    });
+    
+    // Global variables
+    let users = [];
+    let editingUserId = null;
 
-function closeUserModal() {
-    const modal = document.getElementById('userModal');
-    modal.classList.remove('show');
-    editingUserId = null;
-}
-
-function fillUserForm(user) {
-    document.getElementById('firstName').value = user.firstName;
-    document.getElementById('lastName').value = user.lastName;
-    document.getElementById('email').value = user.email;
-    document.getElementById('phoneNumber').value = user.phoneNumber || '';
-    document.getElementById('role').value = user.role;
-}
-
-async function handleUserSubmit(e) {
-    e.preventDefault();
-    
-    const saveBtn = document.getElementById('saveUserBtn');
-    showLoading(saveBtn, true);
-    
-    const formData = new FormData(e.target);
-    const userData = {
-        firstName: formData.get('firstName'),
-        lastName: formData.get('lastName'),
-        email: formData.get('email'),
-        phoneNumber: formData.get('phoneNumber') || null,
-        role: formData.get('role')
-    };
-    
-    if (!editingUserId) {
-        userData.password = formData.get('password');
-    }
-    
-    try {
-        let response;
-        if (editingUserId) {
-            response = await apiService.updateUser(editingUserId, userData);
-        } else {
-            response = await apiService.createUser(userData);
-        }
-        
-        showLoading(saveBtn, false);
-        
-        if (response && response.success) {
-            showAlert(response.message || 'Usuario guardado exitosamente', 'success');
-            closeUserModal();
-            loadUsers();
-        } else if (response && response.message) {
-            showAlert(response.message, 'error');
-        } else {
-            showAlert('Error al guardar usuario', 'error');
-        }
-    } catch (error) {
-        showLoading(saveBtn, false);
-        console.error('Error saving user:', error);
-        if (error && error.message) {
-            showAlert(error.message, 'error');
-        } else {
-            showAlert('Error de conexión al guardar usuario', 'error');
-        }
-    }
+    // Initialize
+    loadUsers();
 }
 
 async function editUser(userId) {
@@ -240,7 +272,7 @@ async function editUser(userId) {
     try {
         const response = await apiService.getUser(userId);
         if (response && response.success) {
-            openUserModal(response.data);
+            openEditUserModal(response.data);
         } else {
             showAlert('Error al cargar usuario');
         }
@@ -270,9 +302,5 @@ async function deleteUser(userId) {
     }
 }
 
-// Close modal on outside click
-document.getElementById('userModal').addEventListener('click', (e) => {
-    if (e.target.id === 'userModal') {
-        closeUserModal();
-    }
-});
+
+// (fin de archivo)

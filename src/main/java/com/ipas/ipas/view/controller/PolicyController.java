@@ -1,6 +1,7 @@
 package com.ipas.ipas.view.controller;
 
 import com.ipas.ipas.presenter.PolicyPresenter;
+import org.springframework.security.access.prepost.PreAuthorize;
 import com.ipas.ipas.view.dto.PolicyRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +29,7 @@ public class PolicyController {
     }
     
     @PostMapping
+    @PreAuthorize("hasRole('ASESOR')")
     public ResponseEntity<Map<String, Object>> createPolicy(
             @Valid @RequestBody PolicyRequest policyRequest,
             Principal principal) {
@@ -35,6 +37,7 @@ public class PolicyController {
     }
     
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ASESOR')")
     public ResponseEntity<Map<String, Object>> updatePolicy(
             @PathVariable Long id,
             @Valid @RequestBody PolicyRequest policyRequest,
