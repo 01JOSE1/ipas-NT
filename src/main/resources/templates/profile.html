@@ -247,11 +247,12 @@
             }
         }
 
-        async function handlePasswordChange(e) {
+                async function handlePasswordChange(e) {
             e.preventDefault();
             
             const changeBtn = document.getElementById('changePasswordBtn');
             const formData = new FormData(e.target);
+            const currentPassword = formData.get('currentPassword');
             const newPassword = formData.get('newPassword');
             const confirmPassword = formData.get('confirmPassword');
             
@@ -259,18 +260,29 @@
                 showAlert('Las nuevas contraseñas no coinciden');
                 return;
             }
+
+            if (newPassword.length < 8) {
+                showAlert('La nueva contraseña debe tener al menos 8 caracteres');
+                return;
+            }
             
             showLoading(changeBtn, true);
             
             try {
-                // This would need a separate endpoint for password change
-                // For now, we'll just show a success message
-                setTimeout(() => {
-                    showLoading(changeBtn, false);
+                const user = authService.getUser();
+                const response = await apiService.changePassword(user.id, {
+                    currentPassword: currentPassword,
+                    newPassword: newPassword
+                });
+                
+                showLoading(changeBtn, false);
+                
+                if (response && response.success) {
                     showAlert('Contraseña cambiada exitosamente', 'success');
                     document.getElementById('passwordForm').reset();
-                }, 1500);
-                
+                } else {
+                    showAlert(response?.message || 'Error al cambiar contraseña');
+                }
             } catch (error) {
                 showLoading(changeBtn, false);
                 console.error('Error changing password:', error);

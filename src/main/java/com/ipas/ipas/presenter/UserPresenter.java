@@ -7,6 +7,7 @@ import com.ipas.ipas.view.dto.UserRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -98,53 +99,62 @@ public class UserPresenter {
         }
     }
     
-    public ResponseEntity<Map<String, Object>> handleUpdateUser(Long id, com.ipas.ipas.view.dto.UserUpdateRequest userRequest) {
+    public ResponseEntity<Map<String, Object>> handleUpdateUser(Long id, UserRequest userRequest, Principal principal) {
         Map<String, Object> response = new HashMap<>();
         try {
-            System.out.println("[UserPresenter] Update request for user id: " + id);
-            System.out.println("[UserPresenter] Valores recibidos: role=" + userRequest.getRole() + ", status=" + userRequest.getStatus());
-            Optional<User> userOpt = userService.findById(id);
-            if (userOpt.isPresent()) {
-                User user = userOpt.get();
-                System.out.println("[UserPresenter] Editando usuario: " + user.getId() + " rol actual: " + user.getRole() + ", status actual: " + user.getStatus());
-                // Permitir modificar el rol
-                if (userRequest.getRole() != null) {
-                    try {
-                        System.out.println("[UserPresenter] Intentando asignar rol: " + userRequest.getRole());
-                        user.setRole(User.UserRole.valueOf(userRequest.getRole()));
-                    } catch (Exception ex) {
-                        System.err.println("[UserPresenter] Error al asignar rol: " + userRequest.getRole());
-                        response.put("success", false);
-                        response.put("message", "Rol inválido: " + userRequest.getRole());
-                        return ResponseEntity.badRequest().body(response);
-                    }
-                }
-                // Permitir modificar el status
-                if (userRequest.getStatus() != null) {
-                    try {
-                        System.out.println("[UserPresenter] Intentando asignar status: " + userRequest.getStatus());
-                        user.setStatus(User.UserStatus.valueOf(userRequest.getStatus()));
-                    } catch (Exception ex) {
-                        System.err.println("[UserPresenter] Error al asignar status: " + userRequest.getStatus());
-                        response.put("success", false);
-                        response.put("message", "Status inválido: " + userRequest.getStatus());
-                        return ResponseEntity.badRequest().body(response);
-                    }
-                }
-                User updatedUser = userService.update(user);
-                System.out.println("[UserPresenter] Usuario actualizado: " + updatedUser.getId() + " nuevo rol: " + updatedUser.getRole() + ", nuevo status: " + updatedUser.getStatus());
-                response.put("success", true);
-                response.put("data", new UserResponse(updatedUser));
-                response.put("message", "User updated successfully");
-            } else {
-                System.out.println("[UserPresenter] Usuario no encontrado para id: " + id);
+            Optional<User> authenticatedUserOpt = userService.findByEmail(principal.getName());
+            if (authenticatedUserOpt.isEmpty()) {
                 response.put("success", false);
-                response.put("message", "User not found");
+                response.put("message", "Authenticated user not found");
+                return ResponseEntity.status(403).body(response);
             }
+
+            User authenticatedUser = authenticatedUserOpt.get();
+            boolean isAdmin = authenticatedUser.getRole() == User.UserRole.ADMINISTRADOR;
+
+            if (!isAdmin && !authenticatedUser.getId().equals(id)) {
+                response.put("success", false);
+                response.put("message", "You are not authorized to update this user");
+                return ResponseEntity.status(403).body(response);
+            }
+
+            Optional<User> userToUpdateOpt = userService.findById(id);
+            if (userToUpdateOpt.isEmpty()) {
+                response.put("success", false);
+                response.put("message", "User to update not found");
+                return ResponseEntity.status(404).body(response);
+            }
+
+            User userToUpdate = userToUpdateOpt.get();
+
+            // Update personal info
+            if (userRequest.getFirstName() != null) {
+                userToUpdate.setFirstName(userRequest.getFirstName());
+            }
+            if (userRequest.getLastName() != null) {
+                userToUpdate.setLastName(userRequest.getLastName());
+            }
+            if (userRequest.getPhoneNumber() != null) {
+                userToUpdate.setPhoneNumber(userRequest.getPhoneNumber());
+            }
+
+            // Admin-only updates
+            if (isAdmin) {
+                if (userRequest.getRole() != null) {
+                    userToUpdate.setRole(User.UserRole.valueOf(userRequest.getRole()));
+                }
+                if (userRequest.getStatus() != null) {
+                    userToUpdate.setStatus(User.UserStatus.valueOf(userRequest.getStatus()));
+                }
+            }
+
+            User updatedUser = userService.update(userToUpdate);
+            response.put("success", true);
+            response.put("data", new UserResponse(updatedUser));
+            response.put("message", "User updated successfully");
             return ResponseEntity.ok(response);
+
         } catch (Exception e) {
-            System.err.println("[UserPresenter] Error updating user: " + e.getMessage());
-            e.printStackTrace();
             response.put("success", false);
             response.put("message", "Error updating user: " + e.getMessage());
             return ResponseEntity.internalServerError().body(response);
