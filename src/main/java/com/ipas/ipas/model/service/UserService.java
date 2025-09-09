@@ -8,8 +8,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -116,7 +119,21 @@ public class UserService {
     }
     
     public List<User> searchUsers(String searchTerm) {
-        return userRepository.findBySearchTerm(searchTerm);
+        List<User> usersByNameEmail = userRepository.findBySearchTerm(searchTerm);
+        
+        List<User> usersByRole = new ArrayList<>();
+        try {
+            User.UserRole role = User.UserRole.valueOf(searchTerm.toUpperCase());
+            usersByRole = userRepository.findByRole(role);
+        } catch (IllegalArgumentException e) {
+            // Not a valid role, ignore
+        }
+
+        // Combine the lists and remove duplicates
+        Set<User> combinedUsers = new LinkedHashSet<>(usersByNameEmail);
+        combinedUsers.addAll(usersByRole);
+        
+        return new ArrayList<>(combinedUsers);
     }
     
     public boolean existsByEmail(String email) {
@@ -133,7 +150,7 @@ public class UserService {
         }
     }
     
-    public void disableTwoFactor(Long userId) {
+    public boolean disableTwoFactor(Long userId) {
         Optional<User> userOpt = userRepository.findById(userId);
         if (userOpt.isPresent()) {
             User user = userOpt.get();
@@ -141,6 +158,20 @@ public class UserService {
             user.setTwoFactorSecret(null);
             userRepository.save(user);
         }
+        return false;
+    }
+
+    public boolean changePassword(Long userId, String currentPassword, String newPassword) {
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            if (passwordEncoder.matches(currentPassword, user.getPassword())) {
+                user.setPassword(passwordEncoder.encode(newPassword));
+                userRepository.save(user);
+                return true;
+            }
+        }
+        return false;
     }
 
     // @Autowired

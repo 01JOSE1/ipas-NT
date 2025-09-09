@@ -8,15 +8,18 @@ public class UserSimpleDTO {
     private String firstName;
     private String lastName;
     private String role;
+    private String phoneNumber;
+
 
     public UserSimpleDTO() {}
 
-    public UserSimpleDTO(Long id, String email, String firstName, String lastName, User.UserRole role) {
+    public UserSimpleDTO(Long id, String email, String firstName, String lastName, User.UserRole role, String phoneNumber) {
         this.id = id;
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
         this.role = (role != null) ? role.name() : null;
+        this.phoneNumber = phoneNumber;
     }
 
     public Long getId() {
@@ -57,5 +60,13 @@ public class UserSimpleDTO {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 }

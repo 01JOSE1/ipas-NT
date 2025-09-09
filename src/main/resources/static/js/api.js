@@ -209,10 +209,10 @@ class ApiService {
         });
     }
 
-    async changePassword(passwordData) {
-        console.log('🔒 Changing password...');
-        return this.request('/profile/change-password', {
-            method: 'POST',
+    async changePassword(userId, passwordData) {
+        console.log('🔒 Changing password for user:', userId);
+        return this.request(`/users/${userId}/password`, {
+            method: 'PUT',
             body: JSON.stringify(passwordData)
         });
     }

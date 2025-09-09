@@ -1,4 +1,3 @@
-
 package com.ipas.ipas.presenter;
 
 import com.ipas.ipas.model.entity.User;
@@ -48,12 +47,13 @@ public class AuthPresenter {
                     String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
                     System.out.println("Token generado: " + token);
                     userService.updateLastLogin(user.getId());
-                    UserSimpleDTO userDto = new UserSimpleDTO(
+                                        UserSimpleDTO userDto = new UserSimpleDTO(
                         user.getId(),
                         user.getEmail(),
                         user.getFirstName(),
                         user.getLastName(),
-                        user.getRole()
+                        user.getRole(),
+                        user.getPhoneNumber()
                     );
                     Map<String, Object> data = new HashMap<>();
                     data.put("token", token);
@@ -68,8 +68,6 @@ public class AuthPresenter {
                 response.put("success", false);
                 if (authStatus == UserService.AuthStatus.INACTIVE_USER) {
                     response.put("message", "Usuario inactivo");
-                } else {
-                    response.put("message", "Credenciales incorrectas");
                 }
                 return ResponseEntity.badRequest().body(response);
             }
@@ -153,6 +151,26 @@ public class AuthPresenter {
         } catch (Exception e) {
             response.put("success", false);
             response.put("message", "Error al registrar usuario: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+    public ResponseEntity<Map<String, Object>> handleChangePassword(Long userId, String currentPassword, String newPassword) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            boolean changed = userService.changePassword(userId, currentPassword, newPassword);
+            if (changed) {
+                response.put("success", true);
+                response.put("message", "Contraseña actualizada exitosamente");
+                return ResponseEntity.ok(response);
+            } else {
+                response.put("success", false);
+                response.put("message", "Contraseña actual incorrecta");
+                return ResponseEntity.badRequest().body(response);
+            }
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Error al cambiar contraseña: " + e.getMessage());
             return ResponseEntity.internalServerError().body(response);
         }
     }
