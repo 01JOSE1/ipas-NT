@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (pageHeader) pageHeader.style.display = 'none';
             return;
         }
-        // Si es REGISTRADO, mostrar solo pantalla de espera
+        // Si es REGISTRADO, mostrar solo pantalla de espera hola
         if (user && user.role === 'REGISTRADO') {
             const mainContent = document.querySelector('.main-content');
             if (mainContent) {
