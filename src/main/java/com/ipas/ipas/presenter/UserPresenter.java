@@ -45,7 +45,7 @@ public class UserPresenter {
         }
     }
     
-    public ResponseEntity<Map<String, Object>> handleGetUser(Long id) {
+    public ResponseEntity<Map<String, Object>> handleGetUser(Long id) {  //Rf04 
         Map<String, Object> response = new HashMap<>();
         
         try {
@@ -98,7 +98,7 @@ public class UserPresenter {
             return ResponseEntity.internalServerError().body(response);
         }
     }
-    
+    //Rf05 
     public ResponseEntity<Map<String, Object>> handleUpdateUser(Long id, UserRequest userRequest, Principal principal) {
         Map<String, Object> response = new HashMap<>();
         try {
