@@ -23,7 +23,7 @@ public class AuthPresenter {
     @Autowired
     private JwtUtil jwtUtil;
 
-    public ResponseEntity<Map<String, Object>> handleLogin(LoginRequest loginRequest) {
+    public ResponseEntity<Map<String, Object>> handleLogin(LoginRequest loginRequest) { //Inicio de sesion RF01
         Map<String, Object> response = new HashMap<>();
 
         System.out.println("Intentando login con email: " + loginRequest.getEmail());
@@ -33,10 +33,10 @@ public class AuthPresenter {
                     loginRequest.getEmail(),
                     loginRequest.getPassword());
 
-            if (authStatus == UserService.AuthStatus.SUCCESS) {
+            if (authStatus == UserService.AuthStatus.SUCCESS) { 
                 Optional<User> userOpt = userService.findByEmail(loginRequest.getEmail());
-                if (userOpt.isPresent()) {
-                    User user = userOpt.get();
+                if (userOpt.isPresent()) { //autenticacion correcta RF02
+                    User user = userOpt.get(); // valida el rol y otros permisos 
                     if (user.getTwoFactorEnabled() &&
                             (loginRequest.getTwoFactorCode() == null || loginRequest.getTwoFactorCode().isEmpty())) {
                         response.put("success", false);
@@ -44,7 +44,7 @@ public class AuthPresenter {
                         response.put("requiresTwoFactor", true);
                         return ResponseEntity.ok(response);
                     }
-                    String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
+                    String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name()); //RF03 respuesta con token y datos de usuario
                     System.out.println("Token generado: " + token);
                     userService.updateLastLogin(user.getId());
                                         UserSimpleDTO userDto = new UserSimpleDTO(
@@ -66,7 +66,7 @@ public class AuthPresenter {
                 }
             } else {
                 response.put("success", false);
-                if (authStatus == UserService.AuthStatus.INACTIVE_USER) {
+                if (authStatus == UserService.AuthStatus.INACTIVE_USER) { // Usuario inactivo o credenciales inválidas
                     response.put("message", "Usuario inactivo");
                 }
                 return ResponseEntity.badRequest().body(response);

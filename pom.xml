@@ -12,7 +12,7 @@
 	<artifactId>ipas</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>ipas</name>
-	<description>Demo project for Spring Boot</description>
+	<description>Demo project for Spring Boot</description> 
 	<url/>
 	<licenses>
 		<license/>
