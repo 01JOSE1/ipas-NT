@@ -16,7 +16,7 @@ pipeline {
                     sh '''
                         export DB_HOST=mysql_container
                         export DB_PORT=3306
-                        export DB_NAME=mi_base
+                        export DB_NAME=ipas_db
                         mvn test
                     '''
                 }
