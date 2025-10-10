@@ -74,6 +74,7 @@ pipeline {
                 -e DB_NAME=ipas_db \
                 -e DB_USER=${DB_USER} \
                 -e DB_PASS=${DB_PASS} \
+                -e SERVER_PORT=8090 \
                 -p 8090:8090 \
                 --name miapp_container \
                 miapp:latest
