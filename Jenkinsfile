@@ -71,7 +71,7 @@ pipeline {
                 --restart unless-stopped \
                 -e DB_HOST=mysql_container \
                 -e DB_PORT=3306 \
-                -e DB_NAME=mi_base \
+                -e DB_NAME=ipas_db \
                 -e DB_USER=${DB_USER} \
                 -e DB_PASS=${DB_PASS} \
                 -p 8081:8080 \
