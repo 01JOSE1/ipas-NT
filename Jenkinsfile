@@ -16,7 +16,7 @@ pipeline {
                 sh '''
                   export DB_HOST=127.0.0.1
                   export DB_PORT=3306
-                  export DB_NAME=mi_base
+                  export DB_NAME=ipas_db
                   export DB_USER=root
                   export DB_PASS=admin123
                   mvn test
