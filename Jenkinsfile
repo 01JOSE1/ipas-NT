@@ -74,7 +74,7 @@ pipeline {
                 -e DB_NAME=mi_base \
                 -e DB_USER=${DB_USER} \
                 -e DB_PASS=${DB_PASS} \
-                -p 8080:8080 \
+                -p 8081:8080 \
                 --name miapp_container \
                 miapp:latest
             '''
