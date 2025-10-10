@@ -69,7 +69,7 @@ pipeline {
               docker run -d \
                 --network mi_red \
                 --restart unless-stopped \
-                -e DB_HOST=mysql_container \
+                -e DB_HOST=127.0.0.1 \
                 -e DB_PORT=3306 \
                 -e DB_NAME=ipas_db \
                 -e DB_USER=${DB_USER} \
