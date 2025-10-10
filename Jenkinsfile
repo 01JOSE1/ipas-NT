@@ -10,11 +10,20 @@ pipeline {
     }
 
     stage('Test') {
-      steps {
-        echo 'Ejecutando pruebas...'
-        sh 'mvn test' // opcional si no usas -DskipTests arriba
-      }
+        steps {
+            script {
+                withCredentials([usernamePassword(credentialsId: 'db-creds', usernameVariable: 'DB_USER', passwordVariable: 'DB_PASS')]) {
+                    sh '''
+                        export DB_HOST=mysql_container
+                        export DB_PORT=3306
+                        export DB_NAME=mi_base
+                        mvn test
+                    '''
+                }
+            }
+        }
     }
+
 
     stage('Archive') {
       steps {
