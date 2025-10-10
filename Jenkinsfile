@@ -13,12 +13,14 @@ pipeline {
         steps {
             script {
                 withCredentials([usernamePassword(credentialsId: 'db-creds', usernameVariable: 'DB_USER', passwordVariable: 'DB_PASS')]) {
-                    sh '''
-                        export DB_HOST=mysql_container
-                        export DB_PORT=3306
-                        export DB_NAME=ipas_db
-                        mvn test
-                    '''
+                sh '''
+                  export DB_HOST=127.0.0.1
+                  export DB_PORT=3306
+                  export DB_NAME=mi_base
+                  export DB_USER=root
+                  export DB_PASS=admin123
+                  mvn test
+                '''
                 }
             }
         }
