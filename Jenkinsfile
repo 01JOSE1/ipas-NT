@@ -26,7 +26,7 @@ pipeline {
                         branches: [[name: '*/main']],
                         userRemoteConfigs: [
                             [
-                                url: '${GITHUB_REPO}',
+                                url: "${GITHUB_REPO}",
                                 credentialsId: 'github-credentials-ipas'
                             ]
                         ]
