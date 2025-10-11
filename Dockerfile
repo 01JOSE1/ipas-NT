@@ -1,14 +1,17 @@
-# Imagen base con Java 17
+# Usar una imagen base con Java 17
 FROM openjdk:21-jdk-slim
 
-# Directorio de trabajo dentro del contenedor
+# Información del mantenedor
+LABEL maintainer="tu-email@example.com"
+
+# Crear directorio para la aplicación
 WORKDIR /app
 
-# Copia el archivo JAR generado por Maven
+# Copiar el archivo JAR al contenedor
 COPY target/*.jar app.jar
 
-# Expone el puerto 8080
-EXPOSE 8090
+# Puerto que usa tu aplicación (cámbialo si es diferente)
+EXPOSE 8080
 
-# Comando de ejecución
+# Comando para ejecutar la aplicación
 ENTRYPOINT ["java", "-jar", "app.jar"]
