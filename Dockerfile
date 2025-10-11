@@ -1,17 +1,14 @@
-# Usar una imagen base con Java 17
-FROM openjdk:21-jdk-slim
+# Usar imagen base de Java
+FROM openjdk:17-slim
 
-# Información del mantenedor
-LABEL maintainer="tu-email@example.com"
-
-# Crear directorio para la aplicación
+# Directorio de trabajo dentro del contenedor
 WORKDIR /app
 
-# Copiar el archivo JAR al contenedor
-COPY target/*.jar app.jar
+# Copiar el JAR que genera Maven
+COPY target/ipas-*.jar app.jar
 
-# Puerto que usa tu aplicación (cámbialo si es diferente)
-EXPOSE 8090
+# Puerto que expone (Spring Boot usa 8080)
+EXPOSE 8080
 
-# Comando para ejecutar la aplicación
+# Comando para ejecutar la app
 ENTRYPOINT ["java", "-jar", "app.jar"]
