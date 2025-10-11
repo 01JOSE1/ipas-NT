@@ -1,0 +1,116 @@
+# Deployment para la Aplicación Spring Boot
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: polizas-app
+  namespace: polizas-app
+  labels:
+    app: polizas-app
+spec:
+  replicas: 2  # 2 réplicas para alta disponibilidad
+  selector:
+    matchLabels:
+      app: polizas-app
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1  # Durante actualización, máximo 1 pod puede estar down
+      maxSurge: 1        # Durante actualización, máximo 1 pod extra
+  template:
+    metadata:
+      labels:
+        app: polizas-app
+        version: v1  # Útil para rastrear versiones
+    spec:
+      # Espera a que MySQL esté listo antes de iniciar
+      initContainers:
+      - name: wait-for-mysql
+        image: busybox:1.28
+        command: 
+        - 'sh'
+        - '-c'
+        - |
+          until nc -z mysql-service 3306; do
+            echo "Esperando a MySQL..."
+            sleep 2
+          done
+          echo "MySQL está listo!"
+      containers:
+      - name: polizas-app
+        image: miapp:latest  # Jenkins actualizará esta imagen
+        imagePullPolicy: Never  # Para usar imágenes locales de Minikube
+        ports:
+        - containerPort: 8090
+          name: http
+        env:
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: DB_HOST
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: DB_PORT
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: DB_NAME
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: DB_USER
+        - name: DB_PASS
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: DB_PASS
+        - name: SERVER_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: SERVER_PORT
+        # Health checks (requiere Spring Boot Actuator)
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8090
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8090
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+---
+# Service para la Aplicación (LoadBalancer para acceso externo)
+apiVersion: v1
+kind: Service
+metadata:
+  name: polizas-app-service
+  namespace: polizas-app
+spec:
+  type: LoadBalancer  # En Minikube usa 'minikube tunnel' para obtener IP externa
+  selector:
+    app: polizas-app
+  ports:
+  - port: 80          # Puerto externo
+    targetPort: 8090  # Puerto del contenedor
+    protocol: TCP
+    name: http
+  sessionAffinity: ClientIP  # Mantiene sesiones del mismo cliente en el mismo pod

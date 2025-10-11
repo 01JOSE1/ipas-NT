@@ -1,0 +1,13 @@
+# PersistentVolumeClaim para datos de MySQL (persisten aunque el pod se elimine)
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pvc
+  namespace: polizas-app
+spec:
+  accessModes:
+    - ReadWriteOnce  # Solo un nodo puede montar este volumen
+  resources:
+    requests:
+      storage: 2Gi  # Ajusta según necesites
+  storageClassName: standard  # Minikube provee 'standard' por defecto
