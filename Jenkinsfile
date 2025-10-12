@@ -102,17 +102,17 @@ pipeline {
                 echo '🔍 Verificando que la aplicación en Docker funciona...'
                 script {
                     // Esperar a que la app inicie
-                    sleep 30
+                    sleep 60
                     
                     // Health check
                     sh '''
-                        for i in {1..10}; do
-                            if curl -f http://localhost:8081/actuator/health; then
-                                echo "✅ Health check exitoso"
-                                exit 0
-                            fi
-                            echo "⏳ Intento $i/10 - Esperando..."
-                            sleep 5
+                        for i in {1..20}; do
+                          if curl -f http://ipas-app:8080/actuator/health; then
+                            echo "✅ Health check exitoso"
+                            exit 0
+                          fi
+                          echo "⏳ Intento $i/20 - Esperando..."
+                          sleep 5
                         done
                         echo "❌ Health check falló"
                         exit 1
