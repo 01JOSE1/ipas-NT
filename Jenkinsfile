@@ -98,11 +98,14 @@ pipeline {
                     // -d -> detach; --network ipas-network -> conecta a la red Docker que usa las BDs
                     // -p 8081:8080 -> expone el puerto 8080 del contenedor en 8081 del host
                     // -e SPRING_DATASOURCE_* -> variables de entorno que la app consumirá para conectarse a BD prod
+                    // --restart=unless-stopped -> reinicia el contenedor automáticamente si el servidor se apaga o reinicia,
+                    //                              a menos que lo detengas manualmente con `docker stop`.
                     sh """
                         docker run -d \
                         --name ipas-app \
                         --network ipas-network \
                         -p 8081:8080 \
+                        --restart=unless-stopped \
                         -e SPRING_DATASOURCE_URL=jdbc:mysql://${DB_PROD_HOST}:${DB_PROD_PORT}/${DB_PROD_NAME} \
                         -e SPRING_DATASOURCE_USERNAME=${DB_PROD_USER} \
                         -e SPRING_DATASOURCE_PASSWORD=${DB_PROD_PASSWORD} \
@@ -111,6 +114,7 @@ pipeline {
                 }
             }
         }
+
     }
     
     post {
