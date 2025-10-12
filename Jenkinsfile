@@ -121,15 +121,15 @@ pipeline {
             }
         }
         
-        stage('Load Image to Kubernetes') {
+        stage('Push Image to Minikube Registry') {
             steps {
-                echo '📤 Cargando imagen en Minikube...'
+                echo '📤 Subiendo imagen al registro interno de Minikube...'
                 script {
-                    // AUTOMATIZACIÓN: Cargar imagen en Minikube
-                    sh "minikube image load ${DOCKER_IMAGE}:latest"
-                    
-                    // Verificar que la imagen se cargó
-                    sh "minikube image ls | grep ${DOCKER_IMAGE}"
+                    // Etiquetar y hacer push a registry interno
+                    sh """
+                        docker tag ${DOCKER_IMAGE}:latest localhost:5000/${DOCKER_IMAGE}:latest
+                        docker push localhost:5000/${DOCKER_IMAGE}:latest
+                    """
                 }
             }
         }
@@ -138,23 +138,14 @@ pipeline {
             steps {
                 echo '☸️ Desplegando en Kubernetes (producción)...'
                 script {
-                    // Actualizar el deployment con la nueva imagen
-                    // Esto hace un rolling update automático
                     sh """
-                        kubectl set image deployment/ipas-app \
-                        ipas=${DOCKER_IMAGE}:latest \
-                        -n ${K8S_NAMESPACE}
-                    """
-                    
-                    // Esperar a que el rollout se complete
-                    sh """
-                        kubectl rollout status deployment/ipas-app \
-                        -n ${K8S_NAMESPACE} \
-                        --timeout=5m
+                        kubectl set image deployment/ipas-app ipas=localhost:5000/${DOCKER_IMAGE}:latest -n ${K8S_NAMESPACE}
+                        kubectl rollout status deployment/ipas-app -n ${K8S_NAMESPACE} --timeout=5m
                     """
                 }
             }
         }
+
         
         stage('Verify Kubernetes Deployment') {
             steps {
