@@ -1,14 +1,17 @@
-# Usar imagen base de Java
-FROM openjdk:17-slim
+FROM openjdk:17-jdk-slim
 
-# Directorio de trabajo dentro del contenedor
 WORKDIR /app
 
-# Copiar el JAR que genera Maven
-COPY target/ipas-*.jar app.jar
+# Copiar el JAR generado por Maven
+COPY target/*.jar app.jar
 
-# Puerto que expone (Spring Boot usa 8080)
+# Exponer puerto
 EXPOSE 8080
 
-# Comando para ejecutar la app
+# Variables de entorno (serán sobrescritas en runtime)
+ENV SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/ipas_prod
+ENV SPRING_DATASOURCE_USERNAME=ipas_prod_user
+ENV SPRING_DATASOURCE_PASSWORD=prod_password
+
+# Ejecutar aplicación
 ENTRYPOINT ["java", "-jar", "app.jar"]
