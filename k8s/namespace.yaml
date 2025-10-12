@@ -1,7 +1,0 @@
-# Namespace para organizar todos los recursos
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: polizas-app
-  labels:
-    name: polizas-app
