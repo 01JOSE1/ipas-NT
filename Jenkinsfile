@@ -116,15 +116,6 @@ pipeline {
             }
         }
         
-        stage('Load Image to Kubernetes') {
-            steps {
-                echo '📤 Cargando imagen en Minikube...'
-                script {
-                    sh "minikube image load ${DOCKER_IMAGE}:latest"
-                    sh "minikube image ls | grep ${DOCKER_IMAGE}"
-                }
-            }
-        }
         
         stage('Deploy to Kubernetes (Production)') {
             steps {
