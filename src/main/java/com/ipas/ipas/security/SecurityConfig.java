@@ -37,7 +37,7 @@ public class SecurityConfig {
             .csrf().disable()
             .authorizeHttpRequests(authz -> authz
                 // Páginas públicas (sin autenticación)
-                .requestMatchers("/", "/login", "/forgot-password", "/reset-password", "/actuator/health", "/actuator/health/**", "/actuator/info").permitAll()
+                .requestMatchers("/", "/login", "/forgot-password", "/reset-password", "/actuator/health", "/actuator/health/**", "/actuator/info", "/actuator/**").permitAll()
                 
                 // Recursos estáticos (CSS, JS, imágenes)
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
