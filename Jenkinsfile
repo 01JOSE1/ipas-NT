@@ -66,7 +66,7 @@ pipeline {
             steps {
                 echo '🐳 Construyendo imagen Docker...'
                 script {
-                    def registry = "docker.io/luisgomez" // Cambia por tu usuario de Docker Hub
+                    def registry = "docker.io/01JOSE1" // Cambia por tu usuario de Docker Hub
                     sh """
                         docker build -t ${registry}/${DOCKER_IMAGE}:${DOCKER_TAG} .
                         docker tag ${registry}/${DOCKER_IMAGE}:${DOCKER_TAG} ${registry}/${DOCKER_IMAGE}:latest
@@ -79,7 +79,7 @@ pipeline {
             steps {
                 echo '📤 Subiendo imagen al registry...'
                 script {
-                    def registry = "docker.io/luisgomez" // mismo que arriba
+                    def registry = "docker.io/01JOSE1" // mismo que arriba
                     sh """
                         docker push ${registry}/${DOCKER_IMAGE}:${DOCKER_TAG}
                         docker push ${registry}/${DOCKER_IMAGE}:latest
