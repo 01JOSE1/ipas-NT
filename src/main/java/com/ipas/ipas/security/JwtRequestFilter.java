@@ -25,8 +25,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private JwtUtil jwtUtil;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, 
-                                    FilterChain chain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+            FilterChain chain) throws ServletException, IOException {
 
         String path = request.getRequestURI();
         System.out.println("🔍 Processing request: " + path); // Debug log
@@ -63,8 +63,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
             if (jwtUtil.validateToken(jwtToken, userDetails.getUsername())) {
                 System.out.println("✅ Token is valid, setting authentication context");
-                UsernamePasswordAuthenticationToken authenticationToken =
-                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities());
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             } else {
@@ -81,16 +81,19 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         }
         chain.doFilter(request, response);
     }
-    
+
     private boolean isPublicPath(String path) {
-        return path.equals("/") ||
-               path.equals("/login") ||
-               path.equals("/forgot-password") ||
-               path.equals("/reset-password") ||
-               path.startsWith("/css/") ||
-               path.startsWith("/js/") ||
-               path.startsWith("/images/") ||
-               path.equals("/favicon.ico") ||
-               path.startsWith("/api/auth/");
+        return  path.equals("/") ||
+                path.equals("/login") ||
+                path.equals("/forgot-password") ||
+                path.equals("/reset-password") ||
+                path.startsWith("/css/") ||
+                path.startsWith("/js/") ||
+                path.startsWith("/images/") ||
+                path.equals("/favicon.ico") ||
+                path.startsWith("/api/auth/") ||
+                path.equals("/actuator/health") || // 👈 AÑADE ESTAS DOS LÍNEAS
+                path.startsWith("/actuator/health/") || // 👈 para cubrir variantes
+                path.equals("/actuator/info"); // 👈 también si la usas
     }
 }
