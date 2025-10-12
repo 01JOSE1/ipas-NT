@@ -62,11 +62,11 @@ pipeline {
             }
         }
         
-       stage('Build Docker Image') {
+        stage('Build Docker Image') {
             steps {
                 echo '🐳 Construyendo imagen Docker...'
                 script {
-                    def registry = "docker.io/01jose1" // Cambia por tu usuario de Docker Hub
+                    def registry = "docker.io/01jose1"
                     sh """
                         docker build -t ${registry}/${DOCKER_IMAGE}:${DOCKER_TAG} .
                         docker tag ${registry}/${DOCKER_IMAGE}:${DOCKER_TAG} ${registry}/${DOCKER_IMAGE}:latest
@@ -77,13 +77,17 @@ pipeline {
         
         stage('Push Docker Image') {
             steps {
-                echo '📤 Subiendo imagen al registry...'
+                echo '📤 Subiendo imagen al registry Docker Hub...'
                 script {
-                    def registry = "docker.io/01jose1" // mismo que arriba
-                    sh """
-                        docker push ${registry}/${DOCKER_IMAGE}:${DOCKER_TAG}
-                        docker push ${registry}/${DOCKER_IMAGE}:latest
-                    """
+                    def registry = "docker.io/01jose1"
+                    // 🔐 Login seguro usando credenciales almacenadas en Jenkins
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        sh """
+                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                            docker push ${registry}/${DOCKER_IMAGE}:${DOCKER_TAG}
+                            docker push ${registry}/${DOCKER_IMAGE}:latest
+                        """
+                    }
                 }
             }
         }
@@ -112,14 +116,11 @@ pipeline {
             }
         }
         
-         stage('Load Image to Kubernetes') {
+        stage('Load Image to Kubernetes') {
             steps {
                 echo '📤 Cargando imagen en Minikube...'
                 script {
-                    // AUTOMATIZACIÓN: Cargar imagen en Minikube
                     sh "minikube image load ${DOCKER_IMAGE}:latest"
-                    
-                    // Verificar que la imagen se cargó
                     sh "minikube image ls | grep ${DOCKER_IMAGE}"
                 }
             }
@@ -129,15 +130,11 @@ pipeline {
             steps {
                 echo '☸️ Desplegando en Kubernetes (producción)...'
                 script {
-                    // Actualizar el deployment con la nueva imagen
-                    // Esto hace un rolling update automático
                     sh """
                         kubectl set image deployment/ipas-app \
-                        ipas=${DOCKER_IMAGE}:latest \
+                        ipas=docker.io/01jose1/${DOCKER_IMAGE}:latest \
                         -n ${K8S_NAMESPACE}
                     """
-                    
-                    // Esperar a que el rollout se complete
                     sh """
                         kubectl rollout status deployment/ipas-app \
                         -n ${K8S_NAMESPACE} \
@@ -147,18 +144,12 @@ pipeline {
             }
         }
 
-        
         stage('Verify Kubernetes Deployment') {
             steps {
                 echo '✅ Verificando despliegue en Kubernetes...'
                 script {
-                    // Ver el estado de los pods
                     sh "kubectl get pods -l app=ipas -n ${K8S_NAMESPACE}"
-                    
-                    // Ver el estado del deployment
                     sh "kubectl get deployment ipas-app -n ${K8S_NAMESPACE}"
-                    
-                    // Ver el estado del HPA (auto-scaling)
                     sh "kubectl get hpa ipas-hpa -n ${K8S_NAMESPACE}"
                 }
             }
@@ -169,7 +160,7 @@ pipeline {
         success {
             echo '✅ ¡Pipeline ejecutado exitosamente!'
             echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
-            echo '📦 Build #${BUILD_NUMBER} desplegado con éxito'
+            echo "📦 Build #${BUILD_NUMBER} desplegado con éxito"
             echo '🐳 Docker (Staging): http://localhost:8081'
             echo '☸️  Kubernetes (Production): ejecuta "minikube service ipas-service --url"'
             echo '📊 Grafana: http://localhost:3000'
@@ -186,3 +177,4 @@ pipeline {
         }
     }
 }
+
