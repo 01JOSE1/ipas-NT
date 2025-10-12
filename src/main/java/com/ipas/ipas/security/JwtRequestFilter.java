@@ -83,17 +83,16 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     }
 
     private boolean isPublicPath(String path) {
-        return  path.equals("/") ||
-                path.equals("/login") ||
-                path.equals("/forgot-password") ||
-                path.equals("/reset-password") ||
-                path.startsWith("/css/") ||
-                path.startsWith("/js/") ||
-                path.startsWith("/images/") ||
-                path.equals("/favicon.ico") ||
-                path.startsWith("/api/auth/") ||
-                path.equals("/actuator/health") || // 👈 AÑADE ESTAS DOS LÍNEAS
-                path.startsWith("/actuator/health/") || // 👈 para cubrir variantes
-                path.equals("/actuator/info"); // 👈 también si la usas
+    // Consider actuator endpoints as public to allow Kubernetes health/readiness probes
+    return  path.equals("/") ||
+        path.equals("/login") ||
+        path.equals("/forgot-password") ||
+        path.equals("/reset-password") ||
+        path.startsWith("/css/") ||
+        path.startsWith("/js/") ||
+        path.startsWith("/images/") ||
+        path.equals("/favicon.ico") ||
+        path.startsWith("/api/auth/") ||
+        path.startsWith("/actuator"); // treat all actuator endpoints as public for probes
     }
 }
