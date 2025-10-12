@@ -83,28 +83,28 @@ public class AuthPresenter {
         }
     }
 
-    public ResponseEntity<Map<String, Object>> handlePasswordReset(PasswordResetRequest request) {
-        Map<String, Object> response = new HashMap<>();
+    // public ResponseEntity<Map<String, Object>> handlePasswordReset(PasswordResetRequest request) {
+    //     Map<String, Object> response = new HashMap<>();
 
-        try {
-            boolean emailSent = userService.generateResetPasswordToken(request.getEmail());
+    //     try {
+    //         boolean emailSent = userService.generateResetPasswordToken(request.getEmail());
 
-            if (emailSent) {
-                response.put("success", true);
-                response.put("message", "Password reset email sent");
-            } else {
-                response.put("success", false);
-                response.put("message", "Email not found");
-            }
+    //         if (emailSent) {
+    //             response.put("success", true);
+    //             response.put("message", "Password reset email sent");
+    //         } else {
+    //             response.put("success", false);
+    //             response.put("message", "Email not found");
+    //         }
 
-            return ResponseEntity.ok(response);
+    //         return ResponseEntity.ok(response);
 
-        } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", "Error processing request: " + e.getMessage());
-            return ResponseEntity.internalServerError().body(response);
-        }
-    }
+    //     } catch (Exception e) {
+    //         response.put("success", false);
+    //         response.put("message", "Error processing request: " + e.getMessage());
+    //         return ResponseEntity.internalServerError().body(response);
+    //     }
+    // }
 
     public ResponseEntity<Map<String, Object>> handleNewPassword(String token, String newPassword) {
         Map<String, Object> response = new HashMap<>();

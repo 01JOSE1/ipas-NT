@@ -24,8 +24,8 @@ public class UserService {
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
     
-    @Autowired
-    private EmailService emailService;
+    // @Autowired
+    // private EmailService emailService;
     
     public enum AuthStatus {
         SUCCESS,
@@ -83,21 +83,21 @@ public class UserService {
         }
     }
     
-    public boolean generateResetPasswordToken(String email) {
-        Optional<User> userOpt = userRepository.findByEmail(email);
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
-            String token = UUID.randomUUID().toString();
-            user.setResetPasswordToken(token);
-            user.setResetPasswordExpires(LocalDateTime.now().plusHours(1));
-            userRepository.save(user);
+    // public boolean generateResetPasswordToken(String email) {
+    //     Optional<User> userOpt = userRepository.findByEmail(email);
+    //     if (userOpt.isPresent()) {
+    //         User user = userOpt.get();
+    //         String token = UUID.randomUUID().toString();
+    //         user.setResetPasswordToken(token);
+    //         user.setResetPasswordExpires(LocalDateTime.now().plusHours(1));
+    //         userRepository.save(user);
             
-            // Send email with reset link
-            emailService.sendPasswordResetEmail(user.getEmail(), token);
-            return true;
-        }
-        return false;
-    }
+    //         // Send email with reset link
+    //         emailService.sendPasswordResetEmail(user.getEmail(), token);
+    //         return true;
+    //     }
+    //     return false;
+    // }
     
     public boolean resetPassword(String token, String newPassword) {
         Optional<User> userOpt = userRepository.findByResetPasswordToken(token);

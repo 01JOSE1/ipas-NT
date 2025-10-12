@@ -23,10 +23,10 @@ public class AuthController {
         return authPresenter.handleLogin(loginRequest);
     }
     
-    @PostMapping("/forgot-password")
-    public ResponseEntity<Map<String, Object>> forgotPassword(@Valid @RequestBody PasswordResetRequest request) {
-        return authPresenter.handlePasswordReset(request);
-    }
+    // @PostMapping("/forgot-password")
+    // public ResponseEntity<Map<String, Object>> forgotPassword(@Valid @RequestBody PasswordResetRequest request) {
+    //     return authPresenter.handlePasswordReset(request);
+    // }
     
     @PostMapping("/reset-password")
     public ResponseEntity<Map<String, Object>> resetPassword(
