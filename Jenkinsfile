@@ -62,36 +62,27 @@ pipeline {
             }
         }
         
-        stage('Build Docker Image') {
+       stage('Build Docker Image') {
             steps {
                 echo '🐳 Construyendo imagen Docker...'
                 script {
-                    sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
-                    sh "docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest"
+                    def registry = "docker.io/luisgomez" // Cambia por tu usuario de Docker Hub
+                    sh """
+                        docker build -t ${registry}/${DOCKER_IMAGE}:${DOCKER_TAG} .
+                        docker tag ${registry}/${DOCKER_IMAGE}:${DOCKER_TAG} ${registry}/${DOCKER_IMAGE}:latest
+                    """
                 }
             }
         }
         
-        stage('Deploy to Docker (Staging)') {
+        stage('Push Docker Image') {
             steps {
-                echo '🚀 Desplegando en Docker (ambiente de staging)...'
+                echo '📤 Subiendo imagen al registry...'
                 script {
-                    // Detener contenedor anterior si existe
-                    sh '''
-                        docker stop ipas-app || true
-                        docker rm ipas-app || true
-                    '''
-                    
-                    // Ejecutar nuevo contenedor
+                    def registry = "docker.io/luisgomez" // mismo que arriba
                     sh """
-                        docker run -d \
-                        --name ipas-app \
-                        --network ipas-network \
-                        -p 8081:8080 \
-                        -e SPRING_DATASOURCE_URL=jdbc:mysql://${DB_PROD_HOST}:${DB_PROD_PORT}/${DB_PROD_NAME} \
-                        -e SPRING_DATASOURCE_USERNAME=${DB_PROD_USER} \
-                        -e SPRING_DATASOURCE_PASSWORD=${DB_PROD_PASSWORD} \
-                        ${DOCKER_IMAGE}:${DOCKER_TAG}
+                        docker push ${registry}/${DOCKER_IMAGE}:${DOCKER_TAG}
+                        docker push ${registry}/${DOCKER_IMAGE}:latest
                     """
                 }
             }
