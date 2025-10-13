@@ -99,6 +99,7 @@ pipeline {
                     sh """
                         docker run -d \
                         --name ipas-app-test \
+                        -p 8081:8080 \
                         --network ipas-network \
                         -e SPRING_DATASOURCE_URL=jdbc:mysql://${DB_PROD_HOST}:${DB_PROD_PORT}/${DB_PROD_NAME} \
                         -e SPRING_DATASOURCE_USERNAME=${DB_PROD_USER} \
