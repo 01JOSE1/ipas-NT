@@ -25,7 +25,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                echo '🔄 Clonando código desde GitHub...'
+                echo '🔄 Clonando código desde GitHub.'
                 checkout scm
             }
         }
