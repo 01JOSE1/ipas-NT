@@ -100,7 +100,7 @@ pipeline {
                 sh '''
                     sleep 60
                     for i in {1..20}; do
-                        if docker exec ipas-app curl -f http://localhost:8080/actuator/health; then
+                        if curl -f http://localhost:8081/actuator/health; then
                             echo "✅ Health check exitoso"
                             exit 0
                         fi
@@ -112,6 +112,7 @@ pipeline {
                 '''
             }
         }
+
         
         stage('Load Image to Kubernetes') {
             steps {
