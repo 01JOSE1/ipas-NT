@@ -167,21 +167,21 @@ pipeline {
         }
 
         stage('Deploy to Kubernetes (remote)') {
-                steps {
-                    script {
-                        def IMAGE = "${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest"
-                        echo "🚀 Desplegando ${IMAGE} en Kubernetes (remotamente)..."
+            steps {
+                script {
+                    def IMAGE = "${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest"
+                    echo "🚀 Desplegando ${IMAGE} en Kubernetes (remotamente)..."
             
-                        sshagent(credentials: ['deploy-server']) {
-                            sh """
-                                ssh -tt -o StrictHostKeyChecking=no jose@192.168.1.8 \\
-                                "/home/jose/deploy-ipas.sh ${IMAGE} || exit 1"
-                            """
-                        }
+                    sshagent(credentials: ['deploy-server']) {
+                        sh """
+                            ssh -tt -o StrictHostKeyChecking=no jose@192.168.1.8 \\
+                            "/home/jose/deploy-ipas.sh ${IMAGE} || exit 1"
+                        """
                     }
                 }
             }
         }
+        
         
     }
 
