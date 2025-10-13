@@ -125,7 +125,6 @@ pipeline {
                             if [ "$HTTP_CODE" = "200" ]; then
                                 echo "✅ Health check exitoso - Aplicación respondiendo correctamente"
                                 curl -s http://ipas-app-test:8080/actuator/health | head -5
-                                docker rm -f ipas-app-test
                                 exit 0
                             fi
                             
