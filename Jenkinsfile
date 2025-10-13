@@ -145,27 +145,26 @@ pipeline {
                 }
             }
         }
-    }
 
-    stage('Publish build info') {
-    steps {
-      echo "Imagen publicada: ${IMAGE_FULL}"
-      // archivar un pequeño archivo con el nombre de la imagen
-      writeFile file: 'image-info.txt', text: "${IMAGE_FULL}\n${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest"
-      archiveArtifacts artifacts: 'image-info.txt', fingerprint: true
-    }
-  }
-
-  stage('Approve deploy to production') {
-    steps {
-      script {
-        // Este input pausa el pipeline hasta que un humano lo apruebe.
-        timeout(time: 1, unit: 'HOURS') {
-          input message: "Aprobar despliegue de ${IMAGE_FULL} a producción?", submitter: 'ops,admin'
+        stage('Publish build info') {
+            steps {
+              echo "Imagen publicada: ${IMAGE_FULL}"
+              // archivar un pequeño archivo con el nombre de la imagen
+              writeFile file: 'image-info.txt', text: "${IMAGE_FULL}\n${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest"
+              archiveArtifacts artifacts: 'image-info.txt', fingerprint: true
+            }
         }
-      }
-    }
-  }
+
+        stage('Approve deploy to production') {
+            steps {
+              script {
+                // Este input pausa el pipeline hasta que un humano lo apruebe.
+                timeout(time: 1, unit: 'HOURS') {
+                  input message: "Aprobar despliegue de ${IMAGE_FULL} a producción?", submitter: 'ops,admin'
+                }
+              }
+            }
+        }
 
   stage('Deploy to Kubernetes (remote)') {
         steps {
@@ -183,6 +182,10 @@ pipeline {
         }
     }
 }
+        
+    }
+
+
     
     post {
         success {
