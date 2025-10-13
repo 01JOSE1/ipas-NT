@@ -5,7 +5,6 @@ WORKDIR /app
 # Copiar el JAR generado por Maven
 COPY target/*.jar app.jar
 
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
 # Exponer puerto
 EXPOSE 8080
