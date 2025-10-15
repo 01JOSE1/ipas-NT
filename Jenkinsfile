@@ -174,7 +174,7 @@ pipeline {
                     echo "🚀 Desplegando ${IMAGE} en Kubernetes (remotamente)..."
             
                     sshagent(credentials: ['deploy-server']) {
-                        sh "ssh -o StrictHostKeyChecking=no jose@192.168.1.8 '/home/jose/deploy-ipas.sh ${IMAGE}'"
+                        sh "ssh -o StrictHostKeyChecking=no jose@192.168.1.17 '/home/jose/deploy-ipas.sh ${IMAGE}'"
                     }
                 }
             }
