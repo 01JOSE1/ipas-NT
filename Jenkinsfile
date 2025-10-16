@@ -140,7 +140,7 @@ pipeline {
                         echo "❌ Health check falló después de 30 intentos (5 minutos)"
                         echo "📋 Últimos logs de la aplicación:"
                         docker logs --tail 50 ipas-app-test
-                        docker rm -f ipas-app-test
+                        
                         exit 1
                     '''
                 }
