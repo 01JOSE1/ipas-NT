@@ -15,13 +15,14 @@ public class PolicySimpleDTO {
     private String status;
     private Long clientId;
     private BigDecimal deductible;
+    private BigDecimal valorSiniestro;
     private String beneficiaries;
     private String termsConditions;
     private String clientName;
 
     public PolicySimpleDTO() {}
 
-    public PolicySimpleDTO(Long id, String policyNumber, String policyType, String coverage, BigDecimal premiumAmount, BigDecimal coverageAmount, LocalDate startDate, LocalDate endDate, String status, Long clientId, BigDecimal deductible, String beneficiaries, String termsConditions, String clientName) {
+    public PolicySimpleDTO(Long id, String policyNumber, String policyType, String coverage, BigDecimal premiumAmount, BigDecimal coverageAmount, LocalDate startDate, LocalDate endDate, String status, Long clientId, BigDecimal deductible, BigDecimal valorSiniestro, String beneficiaries, String termsConditions, String clientName) {
         this.id = id;
         this.policyNumber = policyNumber;
         this.policyType = policyType;
@@ -33,12 +34,15 @@ public class PolicySimpleDTO {
         this.status = status;
         this.clientId = clientId;
         this.deductible = deductible;
+        this.valorSiniestro = valorSiniestro;
         this.beneficiaries = beneficiaries;
         this.termsConditions = termsConditions;
         this.clientName = clientName;
     }
     public BigDecimal getDeductible() { return deductible; }
     public void setDeductible(BigDecimal deductible) { this.deductible = deductible; }
+    public BigDecimal getValorSiniestro() { return valorSiniestro; }
+    public void setValorSiniestro(BigDecimal valorSiniestro) { this.valorSiniestro = valorSiniestro; }
     public String getBeneficiaries() { return beneficiaries; }
     public void setBeneficiaries(String beneficiaries) { this.beneficiaries = beneficiaries; }
     public String getTermsConditions() { return termsConditions; }

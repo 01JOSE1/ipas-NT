@@ -85,6 +85,7 @@
                                     <th>Tipo</th>
                                     <th>Cliente</th>
                                     <th>Prima</th>
+                                    <th>Valor Siniestro</th>
                                     <th>Estado</th>
                                     <th>Vencimiento</th>
                                     <th>Acciones</th>
@@ -92,7 +93,7 @@
                             </thead>
                             <tbody id="policiesTable">
                                 <tr>
-                                    <td colspan="6" class="text-center">Cargando pólizas...</td>
+                                    <td colspan="7" class="text-center">Cargando pólizas...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -157,6 +158,10 @@
                     <label for="deductible" class="form-label">Deducible (S/)</label>
                     <input type="number" id="deductible" name="deductible" class="form-input" min="0" step="0.01">
                 </div>
+                    <div class="form-group">
+                        <label for="valorSiniestro" class="form-label">Valor Siniestro (S/)</label>
+                        <input type="number" id="valorSiniestro" name="valorSiniestro" class="form-input" min="0" step="0.01">
+                    </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closePolicyModal()">Cancelar</button>
                     <button type="submit" class="btn btn-primary" id="savePolicyBtn">Guardar</button>
@@ -249,6 +254,7 @@
                     <td>${policy.policyType}</td>
                     <td>${policy.clientName || '-'}</td>
                     <td>${formatCurrency(policy.premiumAmount)}</td>
+                    <td>${policy.valorSiniestro != null ? formatCurrency(policy.valorSiniestro) : '-'}</td>
                     <td>
                         <span class="badge badge-${getPolicyStatusColor(policy.status)}">
                             ${getPolicyStatusText(policy.status)}
@@ -324,6 +330,7 @@
             document.getElementById('coverage').value = policy.coverage;
             document.getElementById('beneficiaries').value = policy.beneficiaries || '';
             document.getElementById('deductible').value = policy.deductible || '';
+            document.getElementById('valorSiniestro').value = policy.valorSiniestro || '';
         }
 
         async function handlePolicySubmit(e) {
@@ -342,7 +349,8 @@
                 endDate: formData.get('endDate'),
                 coverage: formData.get('coverage'),
                 beneficiaries: formData.get('beneficiaries') || null,
-                deductible: formData.get('deductible') ? parseFloat(formData.get('deductible')) : null
+                deductible: formData.get('deductible') ? parseFloat(formData.get('deductible')) : null,
+                valorSiniestro: formData.get('valorSiniestro') ? parseFloat(formData.get('valorSiniestro')) : null
             };
             
             try {

@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.time.Period;
 import com.ipas.ipas.view.dto.ClientSimpleDTO;
 
 @Component
@@ -54,7 +55,9 @@ public class ClientPresenter {
                 client.getDocumentType() != null ? client.getDocumentType().name() : null,
                 client.getPhoneNumber(),
                 client.getAddress(),
-                client.getOccupation()
+                client.getOccupation(),
+                client.getEdad(),
+                client.getSiniestro()
             )).collect(Collectors.toList());
             response.put("success", true);
             response.put("data", clientDTOs);
@@ -89,7 +92,9 @@ public class ClientPresenter {
                             client.getDocumentType() != null ? client.getDocumentType().name() : null,
                             client.getPhoneNumber(),
                             client.getAddress(),
-                            client.getOccupation()
+                            client.getOccupation(),
+                            client.getEdad(),
+                            client.getSiniestro()
                         );
                         response.put("success", true);
                         response.put("data", clientDTO);
@@ -138,6 +143,12 @@ public class ClientPresenter {
             client.setEmail(clientRequest.getEmail());
             client.setPhoneNumber(clientRequest.getPhoneNumber());
             client.setBirthDate(clientRequest.getBirthDate());
+            client.setSiniestro(clientRequest.getSiniestro());
+            // Calcular edad si se proporciona fecha de nacimiento
+            if (clientRequest.getBirthDate() != null) {
+                Integer edad = Period.between(clientRequest.getBirthDate(), java.time.LocalDate.now()).getYears();
+                client.setEdad(edad);
+            }
             client.setAddress(clientRequest.getAddress());
             client.setOccupation(clientRequest.getOccupation());
             client.setUser(currentUser.get());
@@ -174,6 +185,11 @@ public class ClientPresenter {
                         client.setEmail(clientRequest.getEmail());
                         client.setPhoneNumber(clientRequest.getPhoneNumber());
                         client.setBirthDate(clientRequest.getBirthDate());
+                        client.setSiniestro(clientRequest.getSiniestro());
+                        if (clientRequest.getBirthDate() != null) {
+                            Integer edad = Period.between(clientRequest.getBirthDate(), java.time.LocalDate.now()).getYears();
+                            client.setEdad(edad);
+                        }
                         client.setAddress(clientRequest.getAddress());
                         client.setOccupation(clientRequest.getOccupation());
                         Client updatedClient = clientService.update(client);
@@ -186,7 +202,9 @@ public class ClientPresenter {
                             updatedClient.getDocumentType() != null ? updatedClient.getDocumentType().name() : null,
                             updatedClient.getPhoneNumber(),
                             updatedClient.getAddress(),
-                            updatedClient.getOccupation()
+                            updatedClient.getOccupation(),
+                            updatedClient.getEdad(),
+                            updatedClient.getSiniestro()
                         );
                         response.put("success", true);
                         response.put("data", clientDTO);
@@ -225,7 +243,9 @@ public class ClientPresenter {
                 client.getDocumentType() != null ? client.getDocumentType().name() : null,
                 client.getPhoneNumber(),
                 client.getAddress(),
-                client.getOccupation()
+                client.getOccupation(),
+                client.getEdad(),
+                client.getSiniestro()
             )).collect(java.util.stream.Collectors.toList());
             response.put("success", true);
             response.put("data", clientDTOs);
