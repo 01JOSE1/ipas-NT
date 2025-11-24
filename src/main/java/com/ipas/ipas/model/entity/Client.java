@@ -44,8 +44,14 @@ public class Client {
     @Column(name = "phone_number")
     private String phoneNumber;
     
-    @Column(name = "birth_date")
+    @Column(name = "fecha_nacimiento")
     private LocalDate birthDate;
+
+    @Column(name = "siniestro")
+    private String siniestro;
+    
+    @Column(name = "edad")
+    private Integer edad;
     
     @Column(name = "address", columnDefinition = "TEXT")
     private String address;
@@ -106,6 +112,12 @@ public class Client {
     
     public LocalDate getBirthDate() { return birthDate; }
     public void setBirthDate(LocalDate birthDate) { this.birthDate = birthDate; }
+
+    public String getSiniestro() { return siniestro; }
+    public void setSiniestro(String siniestro) { this.siniestro = siniestro; }
+
+    public Integer getEdad() { return edad; }
+    public void setEdad(Integer edad) { this.edad = edad; }
     
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }

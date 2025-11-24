@@ -57,6 +57,9 @@ public class Policy {
     
     @Column(name = "deductible", precision = 12, scale = 2)
     private BigDecimal deductible;
+
+    @Column(name = "valor_siniestro", precision = 15, scale = 2)
+    private BigDecimal valorSiniestro;
     
     @Column(name = "beneficiaries", length = 1000)
     private String beneficiaries;
@@ -120,6 +123,9 @@ public class Policy {
     
     public BigDecimal getDeductible() { return deductible; }
     public void setDeductible(BigDecimal deductible) { this.deductible = deductible; }
+
+    public BigDecimal getValorSiniestro() { return valorSiniestro; }
+    public void setValorSiniestro(BigDecimal valorSiniestro) { this.valorSiniestro = valorSiniestro; }
     
     public String getBeneficiaries() { return beneficiaries; }
     public void setBeneficiaries(String beneficiaries) { this.beneficiaries = beneficiaries; }

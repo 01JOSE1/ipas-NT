@@ -2,7 +2,9 @@ package com.ipas.ipas.view.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.AssertTrue;
 import java.time.LocalDate;
+import java.time.Period;
 
 public class ClientRequest {
     
@@ -23,6 +25,7 @@ public class ClientRequest {
     
     private String phoneNumber;
     private LocalDate birthDate;
+    private String siniestro;
     private String address;
     private String occupation;
     
@@ -50,6 +53,15 @@ public class ClientRequest {
     
     public LocalDate getBirthDate() { return birthDate; }
     public void setBirthDate(LocalDate birthDate) { this.birthDate = birthDate; }
+
+    public String getSiniestro() { return siniestro; }
+    public void setSiniestro(String siniestro) { this.siniestro = siniestro; }
+
+    @AssertTrue(message = "El cliente debe ser mayor de 18 años")
+    public boolean isAdult() {
+        if (this.birthDate == null) return true; // do not validate if not provided
+        return Period.between(this.birthDate, LocalDate.now()).getYears() >= 18;
+    }
     
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }

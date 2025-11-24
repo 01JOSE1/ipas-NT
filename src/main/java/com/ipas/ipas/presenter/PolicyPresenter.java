@@ -66,6 +66,7 @@ public class PolicyPresenter {
                 policy.getStatus() != null ? policy.getStatus().name() : null,
                 policy.getClient() != null ? policy.getClient().getId() : null,
                 policy.getDeductible(),
+                policy.getValorSiniestro(),
                 policy.getBeneficiaries(),
                 policy.getTermsConditions(),
                 policy.getClient() != null ? (policy.getClient().getFirstName() + " " + policy.getClient().getLastName()) : null
@@ -108,6 +109,7 @@ public class PolicyPresenter {
                             policy.getStatus() != null ? policy.getStatus().name() : null,
                             policy.getClient() != null ? policy.getClient().getId() : null,
                             policy.getDeductible(),
+                            policy.getValorSiniestro(),
                             policy.getBeneficiaries(),
                             policy.getTermsConditions(),
                             policy.getClient() != null ? (policy.getClient().getFirstName() + " " + policy.getClient().getLastName()) : null
@@ -157,6 +159,7 @@ public class PolicyPresenter {
             policy.setDeductible(policyRequest.getDeductible());
             policy.setBeneficiaries(policyRequest.getBeneficiaries());
             policy.setTermsConditions(policyRequest.getTermsConditions());
+            policy.setValorSiniestro(policyRequest.getValorSiniestro());
             policy.setClient(client);
             
             Policy savedPolicy = policyService.save(policy);
@@ -172,6 +175,7 @@ public class PolicyPresenter {
                 savedPolicy.getStatus() != null ? savedPolicy.getStatus().name() : null,
                 savedPolicy.getClient() != null ? savedPolicy.getClient().getId() : null,
                 savedPolicy.getDeductible(),
+                savedPolicy.getValorSiniestro(),
                 savedPolicy.getBeneficiaries(),
                 savedPolicy.getTermsConditions(),
                 savedPolicy.getClient() != null ? (savedPolicy.getClient().getFirstName() + " " + savedPolicy.getClient().getLastName()) : null
@@ -213,6 +217,7 @@ public class PolicyPresenter {
                         policy.setDeductible(policyRequest.getDeductible());
                         policy.setBeneficiaries(policyRequest.getBeneficiaries());
                         policy.setTermsConditions(policyRequest.getTermsConditions());
+                        policy.setValorSiniestro(policyRequest.getValorSiniestro());
                         
                         Policy updatedPolicy = policyService.update(policy);
                         PolicySimpleDTO policyDTO = new PolicySimpleDTO(
@@ -227,6 +232,7 @@ public class PolicyPresenter {
                             updatedPolicy.getStatus() != null ? updatedPolicy.getStatus().name() : null,
                             updatedPolicy.getClient() != null ? updatedPolicy.getClient().getId() : null,
                             updatedPolicy.getDeductible(),
+                            updatedPolicy.getValorSiniestro(),
                             updatedPolicy.getBeneficiaries(),
                             updatedPolicy.getTermsConditions(),
                             updatedPolicy.getClient() != null ? (updatedPolicy.getClient().getFirstName() + " " + updatedPolicy.getClient().getLastName()) : null
@@ -272,6 +278,7 @@ public class PolicyPresenter {
                 policy.getStatus() != null ? policy.getStatus().name() : null,
                 policy.getClient() != null ? policy.getClient().getId() : null,
                 policy.getDeductible(),
+                policy.getValorSiniestro(),
                 policy.getBeneficiaries(),
                 policy.getTermsConditions(),
                 policy.getClient() != null ? (policy.getClient().getFirstName() + " " + policy.getClient().getLastName()) : null

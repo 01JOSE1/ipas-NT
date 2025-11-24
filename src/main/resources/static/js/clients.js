@@ -81,7 +81,7 @@ async function searchClients(query) {
 function renderClientsTable(clientList) {
     const tbody = document.getElementById('clientsTable');
     if (clientList.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="text-center">No se encontraron clientes</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center">No se encontraron clientes</td></tr>';
         return;
     }
     const user = authService.getUser();
@@ -92,6 +92,8 @@ function renderClientsTable(clientList) {
         <tr>
             <td>${client.documentNumber}</td>
             <td>${client.firstName} ${client.lastName}</td>
+            <td>${client.edad != null ? client.edad : '-'}</td>
+            <td>${client.siniestro || 'NO'}</td>
             <td>${client.email || '-'}</td>
             <td>${client.phoneNumber || '-'}</td>
             <td>${client.address && client.address.trim() !== '' ? client.address : '-'}</td>
@@ -167,6 +169,7 @@ function fillClientForm(client) {
     document.getElementById('birthDate').value = client.birthDate || '';
     document.getElementById('occupation').value = client.occupation || '';
     document.getElementById('address').value = client.address || '';
+    document.getElementById('siniestro').value = client.siniestro || 'NO';
 }
 
 async function handleClientSubmit(e) {
@@ -184,9 +187,26 @@ async function handleClientSubmit(e) {
         email: formData.get('email') || null,
         phoneNumber: formData.get('phoneNumber') || null,
         birthDate: formData.get('birthDate') || null,
+        siniestro: formData.get('siniestro') || 'NO',
         occupation: formData.get('occupation') || null,
         address: formData.get('address') || null
     };
+
+    // Validación: no permitir menores de 18 años
+    if (clientData.birthDate) {
+        const today = new Date();
+        const bd = new Date(clientData.birthDate);
+        let age = today.getFullYear() - bd.getFullYear();
+        const m = today.getMonth() - bd.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < bd.getDate())) {
+            age--;
+        }
+        if (age < 18) {
+            showLoading(saveBtn, false);
+            showAlert('El cliente debe ser mayor de 18 años');
+            return;
+        }
+    }
     
     try {
         let response;

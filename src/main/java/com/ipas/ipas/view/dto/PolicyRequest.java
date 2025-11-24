@@ -31,6 +31,7 @@ public class PolicyRequest {
     private BigDecimal deductible;
     private String beneficiaries;
     private String termsConditions;
+    private BigDecimal valorSiniestro;
     
     @NotNull(message = "Client ID is required")
     private Long clientId;
@@ -65,6 +66,8 @@ public class PolicyRequest {
     
     public String getTermsConditions() { return termsConditions; }
     public void setTermsConditions(String termsConditions) { this.termsConditions = termsConditions; }
+    public BigDecimal getValorSiniestro() { return valorSiniestro; }
+    public void setValorSiniestro(BigDecimal valorSiniestro) { this.valorSiniestro = valorSiniestro; }
     
     public Long getClientId() { return clientId; }
     public void setClientId(Long clientId) { this.clientId = clientId; }
