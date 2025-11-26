@@ -1,5 +1,16 @@
 package com.ipas.ipas.presenter;
 
+import java.security.Principal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+
 import com.ipas.ipas.model.entity.Client;
 import com.ipas.ipas.model.entity.Policy;
 import com.ipas.ipas.model.entity.User;
@@ -7,16 +18,7 @@ import com.ipas.ipas.model.service.ClientService;
 import com.ipas.ipas.model.service.PolicyService;
 import com.ipas.ipas.model.service.UserService;
 import com.ipas.ipas.view.dto.PolicyRequest;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
-import java.security.Principal;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import com.ipas.ipas.view.dto.PolicySimpleDTO;
-import java.util.Optional;
 
 @Component
 public class PolicyPresenter {
@@ -54,23 +56,27 @@ public class PolicyPresenter {
             }
             
             // Mapear a DTO simple para evitar problemas de serialización
-            var policyDTOs = policies.stream().map(policy -> new PolicySimpleDTO(
-                policy.getId(),
-                policy.getPolicyNumber(),
-                policy.getPolicyType(),
-                policy.getCoverage(),
-                policy.getPremiumAmount(),
-                policy.getCoverageAmount(),
-                policy.getStartDate(),
-                policy.getEndDate(),
-                policy.getStatus() != null ? policy.getStatus().name() : null,
-                policy.getClient() != null ? policy.getClient().getId() : null,
-                policy.getDeductible(),
-                policy.getValorSiniestro(),
-                policy.getBeneficiaries(),
-                policy.getTermsConditions(),
-                policy.getClient() != null ? (policy.getClient().getFirstName() + " " + policy.getClient().getLastName()) : null
-            )).collect(Collectors.toList());
+            var policyDTOs = policies.stream().map(policy -> {
+                PolicySimpleDTO dto = new PolicySimpleDTO(
+                    policy.getId(),
+                    policy.getPolicyNumber(),
+                    policy.getPolicyType(),
+                    policy.getCoverage(),
+                    policy.getPremiumAmount(),
+                    policy.getCoverageAmount(),
+                    policy.getStartDate(),
+                    policy.getEndDate(),
+                    policy.getStatus() != null ? policy.getStatus().name() : null,
+                    policy.getClient() != null ? policy.getClient().getId() : null,
+                    policy.getDeductible(),
+                    policy.getValorSiniestro(),
+                    policy.getBeneficiaries(),
+                    policy.getTermsConditions(),
+                    policy.getClient() != null ? (policy.getClient().getFirstName() + " " + policy.getClient().getLastName()) : null
+                );
+                dto.setRiskLevel(policy.getRiskLevel());
+                return dto;
+            }).collect(Collectors.toList());
             response.put("success", true);
             response.put("data", policyDTOs);
             return ResponseEntity.ok(response);
@@ -114,6 +120,7 @@ public class PolicyPresenter {
                             policy.getTermsConditions(),
                             policy.getClient() != null ? (policy.getClient().getFirstName() + " " + policy.getClient().getLastName()) : null
                         );
+                        policyDTO.setRiskLevel(policy.getRiskLevel());
                         response.put("success", true);
                         response.put("data", policyDTO);
                     } else {
@@ -160,6 +167,7 @@ public class PolicyPresenter {
             policy.setBeneficiaries(policyRequest.getBeneficiaries());
             policy.setTermsConditions(policyRequest.getTermsConditions());
             policy.setValorSiniestro(policyRequest.getValorSiniestro());
+            policy.setRiskLevel(policyRequest.getRiskLevel());
             policy.setClient(client);
             
             Policy savedPolicy = policyService.save(policy);
@@ -180,6 +188,7 @@ public class PolicyPresenter {
                 savedPolicy.getTermsConditions(),
                 savedPolicy.getClient() != null ? (savedPolicy.getClient().getFirstName() + " " + savedPolicy.getClient().getLastName()) : null
             );
+            policyDTO.setRiskLevel(savedPolicy.getRiskLevel());
             response.put("success", true);
             response.put("data", policyDTO);
             response.put("message", "Policy created successfully");
@@ -218,6 +227,7 @@ public class PolicyPresenter {
                         policy.setBeneficiaries(policyRequest.getBeneficiaries());
                         policy.setTermsConditions(policyRequest.getTermsConditions());
                         policy.setValorSiniestro(policyRequest.getValorSiniestro());
+                        policy.setRiskLevel(policyRequest.getRiskLevel());
                         
                         Policy updatedPolicy = policyService.update(policy);
                         PolicySimpleDTO policyDTO = new PolicySimpleDTO(
@@ -237,6 +247,7 @@ public class PolicyPresenter {
                             updatedPolicy.getTermsConditions(),
                             updatedPolicy.getClient() != null ? (updatedPolicy.getClient().getFirstName() + " " + updatedPolicy.getClient().getLastName()) : null
                         );
+                        policyDTO.setRiskLevel(updatedPolicy.getRiskLevel());
                         response.put("success", true);
                         response.put("data", policyDTO);
                         response.put("message", "Policy updated successfully");
@@ -266,23 +277,27 @@ public class PolicyPresenter {
         try {
             List<Policy> policies = policyService.searchPolicies(searchTerm);
             
-            var policyDTOs = policies.stream().map(policy -> new PolicySimpleDTO(
-                policy.getId(),
-                policy.getPolicyNumber(),
-                policy.getPolicyType(),
-                policy.getCoverage(),
-                policy.getPremiumAmount(),
-                policy.getCoverageAmount(),
-                policy.getStartDate(),
-                policy.getEndDate(),
-                policy.getStatus() != null ? policy.getStatus().name() : null,
-                policy.getClient() != null ? policy.getClient().getId() : null,
-                policy.getDeductible(),
-                policy.getValorSiniestro(),
-                policy.getBeneficiaries(),
-                policy.getTermsConditions(),
-                policy.getClient() != null ? (policy.getClient().getFirstName() + " " + policy.getClient().getLastName()) : null
-            )).collect(Collectors.toList());
+            var policyDTOs = policies.stream().map(policy -> {
+                PolicySimpleDTO dto = new PolicySimpleDTO(
+                    policy.getId(),
+                    policy.getPolicyNumber(),
+                    policy.getPolicyType(),
+                    policy.getCoverage(),
+                    policy.getPremiumAmount(),
+                    policy.getCoverageAmount(),
+                    policy.getStartDate(),
+                    policy.getEndDate(),
+                    policy.getStatus() != null ? policy.getStatus().name() : null,
+                    policy.getClient() != null ? policy.getClient().getId() : null,
+                    policy.getDeductible(),
+                    policy.getValorSiniestro(),
+                    policy.getBeneficiaries(),
+                    policy.getTermsConditions(),
+                    policy.getClient() != null ? (policy.getClient().getFirstName() + " " + policy.getClient().getLastName()) : null
+                );
+                dto.setRiskLevel(policy.getRiskLevel());
+                return dto;
+            }).collect(Collectors.toList());
 
             response.put("success", true);
             response.put("data", policyDTOs);
