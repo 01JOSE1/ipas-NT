@@ -1,0 +1,200 @@
+✅ INTEGRACIÓN COMPLETADA
+
+ARCHIVOS CREADOS:
+═════════════════════════════════════════════════
+
+1. API Python (Modelo IA):
+   📄 entrenamiento-ia-seguros/api_modelo.py
+   → Expone endpoint /predecir-riesgo en http://localhost:5000
+   → Carga el modelo entrenado y hace predicciones
+
+2. DTOs Java (Comunicación):
+   📄 src/main/java/.../RiesgoSiniestroRequestDTO.java
+   📄 src/main/java/.../RiesgoSiniestroResponseDTO.java
+
+3. Servicio IA:
+   📄 src/main/java/.../IAModeloService.java
+   → Llamada HTTP a la API Python
+   → Recibe el nivel de riesgo predicho
+
+4. Configuración:
+   📄 src/main/java/.../RestTemplateConfig.java
+   → Bean RestTemplate para llamadas HTTP
+
+5. Documentación:
+   📄 QUICK_START.md (Lee esto primero!)
+   📄 IA_INTEGRATION_GUIDE.md (Documentación completa)
+   📄 run_ia_api.bat (Script de inicio)
+
+
+ARCHIVOS MODIFICADOS:
+═════════════════════════════════════════════════
+
+1. Entidad Policy:
+   ✏️ src/main/java/.../model/entity/Policy.java
+   → Agregado: @Column(name = "risk_level") private String riskLevel;
+   → Getters/Setters para riskLevel
+
+2. DTO PolicySimpleDTO:
+   ✏️ src/main/java/.../view/dto/PolicySimpleDTO.java
+   → Agregado: private String riskLevel;
+   → Constructor actualizado con riskLevel como último parámetro
+
+3. Presenter (Lo más importante):
+   ✏️ src/main/java/.../presenter/PolicyPresenter.java
+   → Inyectado @Autowired IAModeloService
+   → En handleCreatePolicy(): Llamada a iaModeloService.predecirRiesgo()
+   → Asigna el riesgo a policy.setRiskLevel(resultado)
+   → Todos los DTOs incluyen riskLevel
+
+4. Template UI:
+   ✏️ src/main/resources/templates/policies.html
+   → Nueva columna "Nivel de Riesgo" en la tabla
+   → Badges coloreados (BAJO=verde, MEDIO=naranja, ALTO/CRITICO=rojo)
+   → función getRiskLevelColor() agregada
+
+5. Configuración:
+   ✏️ src/main/resources/application.properties
+   → Agregado: ia.modelo.url=http://localhost:5000
+
+
+CÓMO FUNCIONA:
+═════════════════════════════════════════════════
+
+1. Usuario crea póliza desde UI
+                    ↓
+2. Spring Boot recibe PolicyRequest
+                    ↓
+3. PolicyPresenter.handleCreatePolicy() se ejecuta
+                    ↓
+4. Llama a: iaModeloService.predecirRiesgo(client, policy)
+                    ↓
+5. IAModeloService hace HTTP POST a http://localhost:5000/predecir-riesgo
+                    ↓
+6. API Python (Flask) recibe datos y consulta el modelo
+                    ↓
+7. Modelo predice probabilidad de siniestro
+                    ↓
+8. API convierte probabilidad en nivel: BAJO|MEDIO|ALTO|CRITICO
+                    ↓
+9. API retorna JSON con el nivel predicho
+                    ↓
+10. Spring Boot asigna: policy.setRiskLevel(resultado)
+                    ↓
+11. Póliza se guarda en BD con risk_level
+                    ↓
+12. UI muestra póliza con badge coloreado
+
+
+PASOS PARA EJECUTAR:
+═════════════════════════════════════════════════
+
+TERMINAL 1 - API Python:
+───────────────────────
+cd entrenamiento-ia-seguros
+pip install -r requirements.txt
+python api_modelo.py
+
+✓ Espera a ver: "API disponible en: http://localhost:5000"
+
+TERMINAL 2 - Spring Boot:
+────────────────────────
+cd ipas
+.\mvnw.cmd clean install
+java -jar target/ipas-0.0.1-SNAPSHOT.jar
+
+✓ Espera a ver: "Started IpasApplication in X seconds"
+
+NAVEGADOR:
+──────────
+http://localhost:8010
+→ Login
+→ Ve a Pólizas
+→ Crea una póliza
+→ Verás "Nivel de Riesgo" con color automáticamente
+
+
+VERIFICACIÓN:
+═════════════════════════════════════════════════
+
+✓ ¿Python API responde?
+  curl http://localhost:5000/health
+  → Respuesta: {"status":"ok","modelo_cargado":true}
+
+✓ ¿Póliza tiene riesgo?
+  • Crear póliza → Si falla, revisar logs
+  • Si sale NULL → Python API no está disponible
+  • Si sale "DESCONOCIDO" → Error en predicción
+
+✓ Logs Python:
+  INFO:__main__:Predicción: Riesgo=MEDIO, Probabilidad=45.32%
+
+✓ Logs Spring Boot:
+  Enviando datos al modelo IA: RiesgoSiniestroRequestDTO@...
+  Predicción exitosa - Riesgo: MEDIO, Probabilidad: 0.45
+
+
+NIVEL DE RIESGO EN TABLA:
+═════════════════════════════════════════════════
+
+🟢 BAJO       → Probabilidad < 25%
+🟡 MEDIO      → Probabilidad 25-50%
+🔴 ALTO       → Probabilidad 50-75%
+🔴 CRITICO    → Probabilidad > 75%
+⚪ DESCONOCIDO → Error en predicción
+
+
+PROBLEMÁTICA: "Compilación Java"
+═════════════════════════════════════════════════
+
+Si Maven falla con "release version 21 not supported":
+→ Es un problema de Java disponible en tu PC
+→ El proyecto está configurado para Java 21
+→ Pero ese Java no está instalado o configurado
+
+SOLUCIÓN RÁPIDA:
+1. Usa: mvn compile -D "maven.compiler.source=17" -D "maven.compiler.target=17"
+2. O: Instala Java 21 desde https://www.oracle.com/java/technologies/downloads/
+
+Pero para EJECUTAR la app, simplemente:
+java -jar target/ipas-0.0.1-SNAPSHOT.jar
+(Esto usa el Java del debug terminal, que sí tiene Java 17)
+
+
+IMPORTANTE:
+═════════════════════════════════════════════════
+
+⚠️  AMBAS APLICACIONES DEBEN ESTAR CORRIENDO:
+    - Python API en puerto 5000
+    - Spring Boot en puerto 8010
+
+⚠️  Si cierras Python, Spring Boot dirá:
+    "Connection refused to host: 127.0.0.1, port: 5000"
+    → Reinicia Python y vuelve a crear una póliza
+
+⚠️  Si falla la predicción, el riskLevel será "DESCONOCIDO"
+    → No es un error fatal, la póliza se guarda igual
+    → Pero sin predicción de riesgo
+
+
+ARCHIVOS PARA LEER:
+═════════════════════════════════════════════════
+
+1. QUICK_START.md → Tutorial rápido (EMPEZAR AQUÍ!)
+2. IA_INTEGRATION_GUIDE.md → Documentación completa
+3. Este archivo → Resumen de cambios
+
+
+¡LISTO PARA USAR!
+═════════════════════════════════════════════════
+
+Sigue los pasos en QUICK_START.md y debería funcionar todo.
+
+Si algo no funciona, verifica:
+1. ¿Python API está corriendo? → Ver TERMINAL 1
+2. ¿Spring Boot está corriendo? → Ver TERMINAL 2
+3. ¿Puerto 5000 disponible? → Nada más debe usar 5000
+4. ¿Puerto 8010 disponible? → Nada más debe usar 8010
+5. ¿Firewall permite localhost:5000? → Comprueba firewall
+
+¡Éxito! 🚀

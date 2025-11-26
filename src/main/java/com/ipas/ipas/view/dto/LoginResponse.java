@@ -1,7 +1,5 @@
 package com.ipas.ipas.view.dto;
 
-import com.ipas.ipas.view.dto.UserSimpleDTO;
-
 public class LoginResponse {
     
     private String token;

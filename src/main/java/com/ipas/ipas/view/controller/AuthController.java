@@ -3,7 +3,6 @@ package com.ipas.ipas.view.controller;
 import com.ipas.ipas.view.dto.UserRequest;
 import com.ipas.ipas.presenter.AuthPresenter;
 import com.ipas.ipas.view.dto.LoginRequest;
-import com.ipas.ipas.view.dto.PasswordResetRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

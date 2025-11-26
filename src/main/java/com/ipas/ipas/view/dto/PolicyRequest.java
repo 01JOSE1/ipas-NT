@@ -38,6 +38,12 @@ public class PolicyRequest {
     @NotNull(message = "Client ID is required")
     private Long clientId;
     
+    // Client data for IA model
+    private Integer clientEdad;
+    private String clientSiniestro;
+    private String clientDocumentType;
+    private String clientOccupation;
+    
     // Constructors
     public PolicyRequest() {}
     
@@ -75,4 +81,16 @@ public class PolicyRequest {
     
     public Long getClientId() { return clientId; }
     public void setClientId(Long clientId) { this.clientId = clientId; }
+    
+    public Integer getClientEdad() { return clientEdad; }
+    public void setClientEdad(Integer clientEdad) { this.clientEdad = clientEdad; }
+    
+    public String getClientSiniestro() { return clientSiniestro; }
+    public void setClientSiniestro(String clientSiniestro) { this.clientSiniestro = clientSiniestro; }
+    
+    public String getClientDocumentType() { return clientDocumentType; }
+    public void setClientDocumentType(String clientDocumentType) { this.clientDocumentType = clientDocumentType; }
+    
+    public String getClientOccupation() { return clientOccupation; }
+    public void setClientOccupation(String clientOccupation) { this.clientOccupation = clientOccupation; }
 }
