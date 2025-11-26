@@ -1,10 +1,11 @@
 package com.ipas.ipas.view.dto;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import java.math.BigDecimal;
-import java.time.LocalDate;
 
 public class PolicyRequest {
     
@@ -32,6 +33,7 @@ public class PolicyRequest {
     private String beneficiaries;
     private String termsConditions;
     private BigDecimal valorSiniestro;
+    private String riskLevel;
     
     @NotNull(message = "Client ID is required")
     private Long clientId;
@@ -68,6 +70,8 @@ public class PolicyRequest {
     public void setTermsConditions(String termsConditions) { this.termsConditions = termsConditions; }
     public BigDecimal getValorSiniestro() { return valorSiniestro; }
     public void setValorSiniestro(BigDecimal valorSiniestro) { this.valorSiniestro = valorSiniestro; }
+    public String getRiskLevel() { return riskLevel; }
+    public void setRiskLevel(String riskLevel) { this.riskLevel = riskLevel; }
     
     public Long getClientId() { return clientId; }
     public void setClientId(Long clientId) { this.clientId = clientId; }

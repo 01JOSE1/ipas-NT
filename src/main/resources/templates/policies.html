@@ -19,6 +19,8 @@
 </head>
 <body>
     <script src="/js/auth.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/js/policies.js"></script>
     <script>
         if (!authService.redirectIfNotAuthenticated()) {
             // User is not authenticated, redirectIfNotAuthenticated will handle the redirect.
@@ -83,9 +85,10 @@
                                 <tr>
                                     <th>Número</th>
                                     <th>Tipo</th>
-                                    <th>Cliente</th>
-                                    <th>Prima</th>
-                                    <th>Valor Siniestro</th>
+                                            <th>Cliente</th>
+                                            <th>Nivel de Riesgo</th>
+                                            <th>Prima</th>
+                                            <th>Valor Siniestro</th>
                                     <th>Estado</th>
                                     <th>Vencimiento</th>
                                     <th>Acciones</th>
@@ -93,7 +96,7 @@
                             </thead>
                             <tbody id="policiesTable">
                                 <tr>
-                                    <td colspan="7" class="text-center">Cargando pólizas...</td>
+                                    <td colspan="9" class="text-center">Cargando pólizas...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -136,6 +139,15 @@
                     <div class="form-group">
                         <label for="coverageAmount" class="form-label">Monto de Cobertura (S/)</label>
                         <input type="number" id="coverageAmount" name="coverageAmount" class="form-input" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="riskLevel" class="form-label">Nivel de Riesgo</label>
+                        <select id="riskLevel" name="riskLevel" class="form-select">
+                            <option value="">Seleccionar nivel...</option>
+                            <option value="BAJO">BAJO</option>
+                            <option value="MEDIO">MEDIO</option>
+                            <option value="ALTO">ALTO</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label for="startDate" class="form-label">Fecha de Inicio</label>
@@ -243,8 +255,8 @@
         function renderPoliciesTable(policyList) {
             const tbody = document.getElementById('policiesTable');
             
-            if (policyList.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="text-center">No se encontraron pólizas</td></tr>';
+                if (policyList.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="text-center">No se encontraron pólizas</td></tr>';
                 return;
             }
             
@@ -253,6 +265,7 @@
                     <td>${policy.policyNumber}</td>
                     <td>${policy.policyType}</td>
                     <td>${policy.clientName || '-'}</td>
+                    <td>${policy.riskLevel || '-'}</td>
                     <td>${formatCurrency(policy.premiumAmount)}</td>
                     <td>${policy.valorSiniestro != null ? formatCurrency(policy.valorSiniestro) : '-'}</td>
                     <td>
@@ -331,6 +344,7 @@
             document.getElementById('beneficiaries').value = policy.beneficiaries || '';
             document.getElementById('deductible').value = policy.deductible || '';
             document.getElementById('valorSiniestro').value = policy.valorSiniestro || '';
+            document.getElementById('riskLevel').value = policy.riskLevel || '';
         }
 
         async function handlePolicySubmit(e) {
@@ -351,6 +365,7 @@
                 beneficiaries: formData.get('beneficiaries') || null,
                 deductible: formData.get('deductible') ? parseFloat(formData.get('deductible')) : null,
                 valorSiniestro: formData.get('valorSiniestro') ? parseFloat(formData.get('valorSiniestro')) : null
+                ,riskLevel: formData.get('riskLevel') || null
             };
             
             try {
@@ -412,6 +427,7 @@
                     <div><span class="label">Número:</span><span class="value">${policy.policyNumber}</span></div>
                     <div><span class="label">Tipo:</span><span class="value">${policy.policyType}</span></div>
                     <div><span class="label">Cliente:</span><span class="value">${policy.clientName || '-'}</span></div>
+                    <div><span class="label">Nivel de Riesgo:</span><span class="value">${policy.riskLevel ?? '-'}</span></div>
                     <div><span class="label">Cobertura:</span><span class="value">${policy.coverage}</span></div>
                     <div><span class="label">Prima:</span><span class="value">${formatCurrency(policy.premiumAmount)}</span></div>
                     <div><span class="label">Monto Cobertura:</span><span class="value">${formatCurrency(policy.coverageAmount)}</span></div>
@@ -452,9 +468,6 @@
         }
     </script>
 
-    <!-- Scripts movidos arriba para asegurar el orden correcto -->
-</body>
-    <!-- <script src="/js/auth.js"></script> -->
-    <script src="/js/policies.js"></script>
+    
 </body>
 </html>

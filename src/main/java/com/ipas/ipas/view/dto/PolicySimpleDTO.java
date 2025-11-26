@@ -19,6 +19,7 @@ public class PolicySimpleDTO {
     private String beneficiaries;
     private String termsConditions;
     private String clientName;
+    private String riskLevel;
 
     public PolicySimpleDTO() {}
 
@@ -39,6 +40,8 @@ public class PolicySimpleDTO {
         this.termsConditions = termsConditions;
         this.clientName = clientName;
     }
+    public String getRiskLevel() { return riskLevel; }
+    public void setRiskLevel(String riskLevel) { this.riskLevel = riskLevel; }
     public BigDecimal getDeductible() { return deductible; }
     public void setDeductible(BigDecimal deductible) { this.deductible = deductible; }
     public BigDecimal getValorSiniestro() { return valorSiniestro; }
