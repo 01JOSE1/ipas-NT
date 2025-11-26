@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.ipas.ipas.model.service.UserService;
-import com.ipas.ipas.model.entity.User;
 
 @SpringBootTest
 class IpasApplicationTests {

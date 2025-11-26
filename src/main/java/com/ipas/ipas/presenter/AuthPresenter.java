@@ -4,8 +4,6 @@ import com.ipas.ipas.model.entity.User;
 import com.ipas.ipas.model.service.UserService;
 import com.ipas.ipas.security.JwtUtil;
 import com.ipas.ipas.view.dto.LoginRequest;
-import com.ipas.ipas.view.dto.LoginResponse;
-import com.ipas.ipas.view.dto.PasswordResetRequest;
 import com.ipas.ipas.view.dto.UserSimpleDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

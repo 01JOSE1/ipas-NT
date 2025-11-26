@@ -23,7 +23,7 @@ public class PolicySimpleDTO {
 
     public PolicySimpleDTO() {}
 
-    public PolicySimpleDTO(Long id, String policyNumber, String policyType, String coverage, BigDecimal premiumAmount, BigDecimal coverageAmount, LocalDate startDate, LocalDate endDate, String status, Long clientId, BigDecimal deductible, BigDecimal valorSiniestro, String beneficiaries, String termsConditions, String clientName) {
+    public PolicySimpleDTO(Long id, String policyNumber, String policyType, String coverage, BigDecimal premiumAmount, BigDecimal coverageAmount, LocalDate startDate, LocalDate endDate, String status, Long clientId, BigDecimal deductible, BigDecimal valorSiniestro, String beneficiaries, String termsConditions, String clientName, String riskLevel) {
         this.id = id;
         this.policyNumber = policyNumber;
         this.policyType = policyType;
@@ -39,6 +39,7 @@ public class PolicySimpleDTO {
         this.beneficiaries = beneficiaries;
         this.termsConditions = termsConditions;
         this.clientName = clientName;
+        this.riskLevel = riskLevel;
     }
     public String getRiskLevel() { return riskLevel; }
     public void setRiskLevel(String riskLevel) { this.riskLevel = riskLevel; }
